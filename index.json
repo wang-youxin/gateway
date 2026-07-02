@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "updated_at": "",
+  "skill_count": 0,
+  "capability_count": 0,
+  "skills": {},
+  "_instructions": "说 /gateway refresh 来首次扫描并填充此索引。详见 README.md。"
+}
