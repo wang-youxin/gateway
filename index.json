@@ -1,0 +1,2736 @@
+{
+  "version": "2.0",
+  "updated_at": "2026-07-15T09:56:30.394035Z",
+  "skill_count": 56,
+  "capability_count": 206,
+  "skills": {
+    "dbs": {
+      "name": "dbs",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs/SKILL.md",
+      "description": "dontbesilent 商业工具箱主入口。双模式：任务前路由（你的问题该用哪个 skill）+ 任务后导航（刚做完诊断，下一步该干什么）。",
+      "trigger": "/dbs, /商业, '帮我看看', '下一步怎么走'",
+      "category": "workflow",
+      "capabilities": [
+        {
+          "id": "dbs-pre-task-routing",
+          "name": "任务前路由（模式 A）",
+          "description": "根据用户意图从路由表中匹配正确的 dbs-* skill 并调用。支持 20+ 种商业诊断场景的意图判断和路由。输入：用户自然语言需求。输出：调用对应 skill。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "路由决策 + skill 调用"
+        },
+        {
+          "id": "dbs-post-task-navigation",
+          "name": "任务后导航（模式 B）",
+          "description": "读完上一个 skill 的结论信号，根据导航地图推荐 2-3 个有理由的下一步方向。输入：前一个 skill 的诊断结论。输出：2-3 个推荐的下一步 + 原因。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "诊断报告",
+          "output_type": "推荐列表"
+        },
+        {
+          "id": "dbs-intent-classification",
+          "name": "意图分类与模糊需求澄清",
+          "description": "用户需求模糊时通过单问题交互将意图收敛到路由表中的具体 skill。提供 16 个选项供用户选择。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "澄清问题"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs-action",
+        "dbs-diagnosis",
+        "dbs-benchmark",
+        "dbs-content",
+        "dbs-chatroom"
+      ]
+    },
+    "dbs-action": {
+      "name": "dbs-action",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-action/SKILL.md",
+      "description": "dontbesilent 执行力诊断。用阿德勒心理学框架诊断你「知道该做什么但就是不做」的真正原因。",
+      "trigger": "/dbs-action, /action, '我知道该怎么做但就是不做', '为什么我总是拖延'",
+      "category": "thinking",
+      "capabilities": [
+        {
+          "id": "dbs-action-signal-recognition",
+          "name": "执行力信号识别",
+          "description": "从用户描述中识别 6 种执行障碍信号：执行模拟器(A)、思考手淫(B)、方向跳跃(C)、知识上瘾(D)、完美主义(E)、被强迫叙事(F)。每种信号对应一个诊断框架。输入：用户描述的执行卡点。输出：识别到的信号类型。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "信号分类"
+        },
+        {
+          "id": "dbs-action-adlerian-diagnosis",
+          "name": "阿德勒框架诊断",
+          "description": "基于阿德勒个体心理学输出执行力诊断报告，包含信号识别、真正原因、阿德勒解法（帮助他人打破自卑循环）和一句话处方。输入：用户叙事。输出：诊断报告。",
+          "standalone": true,
+          "reusable": false,
+          "input_type": "自然语言",
+          "output_type": "诊断报告"
+        },
+        {
+          "id": "dbs-action-user-listening",
+          "name": "用户倾听与场景收集",
+          "description": "让用户完整描述执行卡点，不打断、不急于诊断，收集原始叙事材料。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "结构化场景描述"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-diagnosis",
+        "dbs-goal",
+        "dbs-slowisfast"
+      ]
+    },
+    "dbs-goal": {
+      "name": "dbs-goal",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-goal/SKILL.md",
+      "description": "dontbesilent 目标清晰化。用维特根斯坦的语言哲学把模糊的目标审计成可检查的交付物。",
+      "trigger": "/dbs-goal, /目标, '帮我搞清楚目标', '我想做个人 IP', '我的目标是成为...'",
+      "category": "thinking",
+      "capabilities": [
+        {
+          "id": "dbs-goal-three-usage-tests",
+          "name": "三个用法测试",
+          "description": "逐个提问、等回答：可指物性（做到了指着什么说「就是这个」）、可否证性（什么情况下算没做到）、是否真终点（做到之后下一步做什么）。任何一问不通过不能进入下一阶段。输入：用户目标。输出：三问结果。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "目标描述",
+          "output_type": "三问判定结果"
+        },
+        {
+          "id": "dbs-goal-idling-words",
+          "name": "空转词识别",
+          "description": "逐词过用户原话，用「去掉测试」判定每个词是否空转（去掉后句子是否还成立）。输出空转词清单表格。输入：目标原话。输出：空转词清单。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "目标原话",
+          "output_type": "空转词清单"
+        },
+        {
+          "id": "dbs-goal-rewrite",
+          "name": "目标重写与验收 checklist",
+          "description": "将空转词替换为可指物描述，同时生成验收 checklist（五条家族相似特征：可指物性、可否证性、有完成态、语法健全、嵌在上下文）。输入：空转词分析结果。输出：重写目标+checklist。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "空转词分析结果",
+          "output_type": "重写目标 + 验收 checklist"
+        },
+        {
+          "id": "dbs-goal-language-game-test",
+          "name": "放回语言游戏检验",
+          "description": "把目标放回用户当下生活，检查下一步是否自然浮现。如果浮现「做不动」则路由到 dbs-action。输入：重写后的目标。输出：行动判断。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "重写后的目标",
+          "output_type": "行动判断"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-action",
+        "dbs-diagnosis",
+        "dbs-deconstruct"
+      ]
+    },
+    "dbs-restore": {
+      "name": "dbs-restore",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-restore/SKILL.md",
+      "description": "把上次诊断的状态拉出来，接着用。配合 dbs-save 使用。",
+      "trigger": "/dbs-restore, /续上, '接着上次', '之前的结论', '上次诊断到哪了'",
+      "category": "state-management",
+      "capabilities": [
+        {
+          "id": "dbs-restore-snapshot-location",
+          "name": "存档定位",
+          "description": "按默认项目/指定序号/--slug 三种方式定位存档文件。找不到时自动扫描 ~/.dbs/sessions/ 下最近活跃的 3 个项目让用户选。按文件名时间戳排序。输入：定位条件。输出：存档文件。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "定位条件",
+          "output_type": "存档文件"
+        },
+        {
+          "id": "dbs-restore-state-presentation",
+          "name": "状态呈现",
+          "description": "读取并解析存档 frontmatter+body，输出紧凑状态 markdown：项目/时间/主诉/来源/状态/结论/否决方向/待验证假设/下一步。末尾只问开放性问句，不替用户决定。输入：存档文件。输出：状态摘要。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "存档文件",
+          "output_type": "状态摘要"
+        },
+        {
+          "id": "dbs-restore-response-routing",
+          "name": "用户回应路由",
+          "description": "根据用户回应路由：「接着下一步走」则调用 next_skill 并传递存档上下文、「有新情况」则进 dbs-diagnosis 问诊模式、「具体新问题」则按 dbs 主路由判断。输入：用户回应。输出：路由决策。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "用户回应",
+          "output_type": "路由决策"
+        }
+      ],
+      "dependencies": [
+        "dbs-save"
+      ],
+      "related": [
+        "dbs",
+        "dbs-save",
+        "dbs-report"
+      ]
+    },
+    "dbs-save": {
+      "name": "dbs-save",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-save/SKILL.md",
+      "description": "把当前诊断的关键状态存到本地，下次回来可以接着用。",
+      "trigger": "/dbs-save, /存档, '保存这次诊断', '记下来', '这个结论留着'",
+      "category": "state-management",
+      "capabilities": [
+        {
+          "id": "dbs-save-snapshot-write",
+          "name": "诊断存档写入",
+          "description": "判断对话是否有可存档内容，自动提取标题 ≤20字，按项目隔离写入 ~/.dbs/sessions/{slug}/{YYYYMMDD-HHMMSS}-{title}.md。格式为 YAML frontmatter + 6 段 body。status 字段三值（in-progress/resolved/abandoned）。输入：诊断内容。输出：存档文件。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "诊断内容",
+          "output_type": "存档文件"
+        },
+        {
+          "id": "dbs-save-list",
+          "name": "存档列表查询",
+          "description": "列出当前项目或指定项目下所有存档，格式：序号 + 日期 + 标题 + 状态 + 来源 skill。状态对用户展示时翻译为中文。输入：项目名（可选）。输出：存档列表。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "项目名（可选）",
+          "output_type": "存档列表"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-restore",
+        "dbs-report"
+      ]
+    },
+    "baoyu-image-gen": {
+      "name": "baoyu-image-gen",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-image-gen/SKILL.md",
+      "description": "AI image generation with OpenAI GPT Image 2, Azure OpenAI, Google, OpenRouter, DashScope, Z.AI GLM-Image, MiniMax, Jimeng, Seedream, Replicate and Agnes APIs. Supports text-to-image, reference images,",
+      "trigger": "生成图片、generate image、AI绘图、画一张",
+      "category": "dev",
+      "capabilities": [
+        {
+          "id": "baoyu-image-gen-multi",
+          "name": "多后端AI生图",
+          "description": "OpenAI/Google/DashScope/MiniMax/Jimeng/Seedream等10+后端，支持参考图和批量",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "提示词",
+          "output_type": "PNG图片"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "dbs-deconstruct": {
+      "name": "dbs-deconstruct",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-deconstruct/SKILL.md",
+      "description": "dontbesilent 概念拆解。用维特根斯坦 + 奥派经济学的方法，把模糊的商业概念拆到原子级别。",
+      "trigger": "/dbs-deconstruct, /拆概念, '帮我拆解这个概念', '这个词到底什么意思'",
+      "category": "thinking",
+      "capabilities": [
+        {
+          "id": "dbs-deconstruct-wittgenstein-review",
+          "name": "维特根斯坦式审查",
+          "description": "三步审查：使用场景分析（同一词在不同场景的不同含义）、概念还原（追溯原始语境和属性迁移）、伪概念检测（去掉该词后能否用大白话说清楚）。输入：一个概念词。输出：审查结论。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "概念词",
+          "output_type": "审查结论"
+        },
+        {
+          "id": "dbs-deconstruct-austrian-calibration",
+          "name": "奥派经济学校准",
+          "description": "用奥派框架校准商业/经济概念：主观价值论、行动先于理论、反理性建构主义、价格信号验证。输入：商业概念。输出：校准后的理解。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "商业概念",
+          "output_type": "校准后的概念"
+        },
+        {
+          "id": "dbs-deconstruct-report",
+          "name": "拆解报告输出",
+          "description": "输出结构化拆解报告：你以为它是什么/不同场景使用方式/概念还原/大白话版本/Question vs Problem 判定/犀利总结。输入：分析结果。输出：拆解报告。",
+          "standalone": false,
+          "reusable": false,
+          "input_type": "分析结果",
+          "output_type": "拆解报告"
+        },
+        {
+          "id": "dbs-deconstruct-seven-tables",
+          "name": "7 张表本体论深度分析（可选）",
+          "description": "对复杂概念用 7 张表做完整本体论分析：对象表、事态表、复合事态表、关系表、规则表、形式表、定义表。输入：复杂概念。输出：7 张分析表。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "复杂概念",
+          "output_type": "7 张分析表"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-diagnosis",
+        "dbs-goal",
+        "dbs-chatroom-austrian"
+      ]
+    },
+    "baoyu-infographic": {
+      "name": "baoyu-infographic",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-infographic/SKILL.md",
+      "description": "Generate professional infographics with 21 layout types and 22 visual styles. Analyzes content, recommends layout×style combinations, and generates publication-ready infographics. Use when user asks t",
+      "trigger": "信息图、infographic、可视化、数据图",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "baoyu-infographic-gen",
+          "name": "信息图生成",
+          "description": "21种布局x22种风格的专业信息图",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "数据/内容",
+          "output_type": "信息图PNG"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "shortvideo-dimension-extractor": {
+      "name": "shortvideo-dimension-extractor",
+      "type": "agent",
+      "path": "~/.agents/skills/shortvideo-dimension-extractor/SKILL.md",
+      "description": "短视频报告多维结构化提取器。从14-Gate拆解报告中提取思维结构/语言结构/词级别/传播心理四头25标签。支持单报告和批量模式。",
+      "trigger": "/提取维度、/dimension-extract、提取维度",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "sv-extract-validate",
+          "name": "报告完整性验证",
+          "description": "检查14 Gate是否存在，记录缺失Gate，计算完整性评分。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "拆解报告",
+          "output_type": "完整性评估"
+        },
+        {
+          "id": "sv-extract-thinking",
+          "name": "思维结构维度提取(6子标签)",
+          "description": "提取归纳式/类比式/升维式/反共识/定义式/归因式6种思维模式。每标签标注原文引用和来源Gate。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "拆解报告",
+          "output_type": "结构化JSON"
+        },
+        {
+          "id": "sv-extract-language",
+          "name": "语言结构维度提取(8子标签)",
+          "description": "提取极简条件句/三连排比/否定式/感叹顿悟/身份切换/数字精确化/降一级/闭环嵌套8种语言结构。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "拆解报告",
+          "output_type": "结构化JSON"
+        },
+        {
+          "id": "sv-extract-psychology",
+          "name": "传播心理维度提取(5子标签)",
+          "description": "提取沉默螺旋/确定性供给/身份认同/社交货币/焦虑缓解5种传播心理机制。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "拆解报告",
+          "output_type": "结构化JSON"
+        },
+        {
+          "id": "sv-extract-word",
+          "name": "词级别维度提取(6子标签)",
+          "description": "提取价值词/降权词/填充词/权力动词/空间隐喻词/时间锚点词6类词级别特征。含计数和示例。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "拆解报告",
+          "output_type": "结构化JSON"
+        },
+        {
+          "id": "sv-extract-batch",
+          "name": "批量提取模式",
+          "description": "处理多份报告时每份独立提取，输出_summary.json汇总。最多并行8份。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "多份报告",
+          "output_type": "汇总JSON"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "shortvideo-transform-engine",
+        "shortvideo-pipeline-qa",
+        "shortvideo-multiagent-coordinator",
+        "dbs-content"
+      ]
+    },
+    "baoyu-xhs-images": {
+      "name": "baoyu-xhs-images",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-xhs-images/SKILL.md",
+      "description": "Generates infographic image card series with 12 visual styles, 8 layouts, and 3 color palettes. Breaks content into 1-10 cartoon-style image cards optimized for social media engagement. Use when user ",
+      "trigger": "小红书图片、微信图文、图片卡片",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "baoyu-xhs-images-gen",
+          "name": "小红书/微信图文卡片",
+          "description": "12风格x8布局图文卡片，小红书种草+微信贴图",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "内容",
+          "output_type": "卡片PNG"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "dbs-chatroom-austrian": {
+      "name": "dbs-chatroom-austrian",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-chatroom-austrian/SKILL.md",
+      "description": "哈耶克 × 米塞斯 × Claude 三人对话。奥派经济学视角的多角色讨论。",
+      "trigger": "/dbs-chatroom-austrian, /奥派, '奥派聊天室'",
+      "category": "thinking",
+      "capabilities": [
+        {
+          "id": "dbs-chatroom-austrian-hayek",
+          "name": "哈耶克角色 Agent",
+          "description": "从知识分散性出发，追问知识条件、检查涌现可能、寻找信息机制。系统、精确、文雅但坚定。输入：话题。输出：哈耶克视角的分析。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "哈耶克视角分析"
+        },
+        {
+          "id": "dbs-chatroom-austrian-mises",
+          "name": "米塞斯角色 Agent",
+          "description": "从人类行为学出发，先验推理、追问因果链、拒绝妥协。锋利、不妥协、演绎逻辑。输入：话题。输出：米塞斯视角的分析。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "米塞斯视角分析"
+        },
+        {
+          "id": "dbs-chatroom-austrian-judge",
+          "name": "Claude 判官总结",
+          "description": "判断讨论质量、防止套公式、补盲区、给用户可带走的具体判断或行动建议。",
+          "standalone": true,
+          "reusable": false,
+          "input_type": "多角色对话",
+          "output_type": "判官总结"
+        },
+        {
+          "id": "dbs-chatroom-austrian-multi-turn",
+          "name": "多轮对话管理",
+          "description": "支持继续对话模式，保留最近 3 轮完整对话上下文，超过 3 轮压缩为摘要。Agent prompt 追加上下文。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "对话历史",
+          "output_type": "上下文摘要"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-chatroom",
+        "dbs-deconstruct",
+        "dbs-diagnosis"
+      ]
+    },
+    "dbs-content-system": {
+      "name": "dbs-content-system",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-content-system/SKILL.md",
+      "description": "dontbesilent 内容结构化系统。把本地大量文稿、推文、选题、案例搭成可持续生长的内容结构化工程。",
+      "trigger": "/dbs-content-system, /内容结构化系统, '把本地素材变成可重组系统', '内容资产工程'",
+      "category": "state-management",
+      "capabilities": [
+        {
+          "id": "dbs-content-system-audit",
+          "name": "内容审计",
+          "description": "审计用户指定的内容目录，统计可处理文件数/文本规模/来源维度/边界门槛。判断是否满足审计门槛（≥50个文件或≥80000字）。输入：目录路径。输出：审计报告或降级路径。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件目录",
+          "output_type": "审计报告"
+        },
+        {
+          "id": "dbs-content-system-scaffold",
+          "name": "工程骨架建立",
+          "description": "建立标准工程目录结构（00-规则与索引/01-原始素材区/02-内容单元库/03-处理状态/04-模板/05-主题地图/06-选题装配/07-脚本与工具），写入 AGENTS.md/CLAUDE.md/SOURCE_OF_TRUTH.md/README.md。输入：目标目录。输出：完整目录结构。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "目录路径",
+          "output_type": "目录结构 + 规则文件"
+        },
+        {
+          "id": "dbs-content-system-source-copy",
+          "name": "原始素材复制与索引建立",
+          "description": "把源目录内容复制到工程中，建立原始素材索引、待处理清单、来源注册表。原始副本不得改写。输入：源目录。输出：索引+注册表。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "源目录",
+          "output_type": "索引文件"
+        },
+        {
+          "id": "dbs-content-system-sample-extraction",
+          "name": "内容单元抽取",
+          "description": "从样本文稿抽取首批内容单元（QST/CON/OPI/CAS/SOL 五类），验证结构可维护性。有升档闸门控制样本到批量模式的切换。输入：文稿。输出：内容单元。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文稿文本",
+          "output_type": "内容单元"
+        },
+        {
+          "id": "dbs-content-system-topic-map",
+          "name": "主题地图与装配稿建立",
+          "description": "建立至少 3 张主题地图和 2 份选题装配稿。主题地图聚合节点，装配稿把节点变成可发布的表达骨架。输入：内容单元集合。输出：主题地图+装配稿。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "内容单元集合",
+          "output_type": "主题地图 + 装配稿"
+        },
+        {
+          "id": "dbs-content-system-verification",
+          "name": "关系/去重/总览校验",
+          "description": "生成关系索引、去重候选索引、处理状态总览。运行 8 个脚本验证系统可维护性。输入：工程目录。输出：校验报告。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "工程目录",
+          "output_type": "校验报告"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-agent-migration",
+        "dbs-good-question",
+        "dbs-content"
+      ]
+    },
+    "ponytail": {
+      "name": "ponytail",
+      "type": "agent",
+      "path": "~/.agents/skills/ponytail/SKILL.md",
+      "description": "Forces the laziest solution that actually works. Senior dev reflex: YAGNI �� stdlib �� native �� one-liner. Supports lite/full/ultra intensity.",
+      "trigger": "/ponytail, \"be lazy\", \"lazy mode\", \"simplest\", \"yagni\", \"do less\", \"shortest path\"",
+      "category": "dev",
+      "capabilities": [
+        {
+          "id": "ponytail-ladder",
+          "name": "�߼����߽���",
+          "description": "ÿ��������������ݣ�1.��Ҫ������(YAGNI) 2.��������� 3.��׼�� 4.ԭ��ƽ̨ 5.�Ѱ�װ���� 6.һ�и㶨 7.��С���д��롣�������ŵ�סȡ�����Ǽ���",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "��������",
+          "output_type": "���ʵ��"
+        },
+        {
+          "id": "ponytail-intensity",
+          "name": "����ǿ�ȿ���",
+          "description": "lite(������ʾ��������)/full(Ĭ��,����ǿ��ִ��)/ultra(YAGNI����,ɾ������)�����룺ǿ�ȼ���+�����������Ӧ�������򷽰���",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "ǿ�Ȳ��� + ����",
+          "output_type": "��Ӧ���𷽰�"
+        },
+        {
+          "id": "ponytail-root-cause",
+          "name": "Bug �����޸�",
+          "description": "Bug����=֢״���Ǹ�����֮ǰ grep ���е��÷����ڹ����������һ�ζ�����ÿ�����÷���һ�Ρ����룺bug����+���롣����������޸���",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Bug���� + ����",
+          "output_type": "�����޸�����"
+        },
+        {
+          "id": "ponytail-minimal-output",
+          "name": "��С�����ʽ",
+          "description": "�������ȣ�����������У�[����] �� ������ʲô��ʲôʱ��ӻ��������ͱȴ��볤��ɾ���͡�",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "������",
+          "output_type": "���� + 3�н���"
+        },
+        {
+          "id": "ponytail-simplification-markers",
+          "name": "�򻯱��������ע��",
+          "description": "�� ponytail: ע�ͱ�ǿ���򻯣����ⱻ������֪������֪���޵Ľݾ���ע���޺�����·����",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "����",
+          "output_type": "����ǵĴ���"
+        },
+        {
+          "id": "ponytail-self-check",
+          "name": "��С�Լ�",
+          "description": "��ƽ���߼�(��֧/ѭ��/����/��Ǯ/��ȫ·��)��һ�������м�飺assert demo() ��һ�� test_*.py�����ÿ�ܡ�����fixture��",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "�����߼�",
+          "output_type": "��С����"
+        }
+      ],
+      "dependencies": [],
+      "related": []
+    },
+    "baoyu-slide-deck": {
+      "name": "baoyu-slide-deck",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-slide-deck/SKILL.md",
+      "description": "Generates professional slide deck images from content. Creates outlines with style instructions, then generates individual slide images. Use when user asks to \"create slides\", \"make a presentation\", \"",
+      "trigger": "幻灯片、slide deck、PPT",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "baoyu-slide-deck-gen",
+          "name": "幻灯片生成",
+          "description": "内容转专业幻灯片图片",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "内容大纲",
+          "output_type": "幻灯片PNG"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "course-deconstruct": {
+      "name": "course-deconstruct",
+      "type": "agent",
+      "path": "~/.agents/skills/course-deconstruct/SKILL.md",
+      "description": "多Agent协调工作流。输入课程逐字稿 → 分诊Agent验证+拆任务 → 教学方式分析+内容知识分析并行 → 交叉审核合并 → 用户确认 → 三主题文案(工具论/三层杠杆/成交四步)并行生成 → 终检验收。6个Agent+3道审核关。",
+      "trigger": "/course-deconstruct, 拆解这节课, 分析课程文案, 出三篇文案",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "course-deconstruct-triage",
+          "name": "分诊Agent（Phase 0）",
+          "description": "验证素材有效性、识别课程类型、拆解知识单元、生成Agent A和Agent B的任务书。输入：课程逐字稿。输出：验证结果+两本任务书。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "课程逐字稿",
+          "output_type": "验证结果+任务书"
+        },
+        {
+          "id": "course-deconstruct-analyze-teaching",
+          "name": "教学方式分析Agent（Agent A）",
+          "description": "只分析怎么教的：宏观节奏/6步循环/钩子设计/案例选择/语言风格。每个判断必须附带课程原文证据。与Agent B并行运行。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "任务书+课程文本",
+          "output_type": "五维度教学分析报告"
+        },
+        {
+          "id": "course-deconstruct-analyze-knowledge",
+          "name": "内容知识分析Agent（Agent B）",
+          "description": "只分析教了什么：知识点树状图谱/论据链标注/隐含前提识别/框架可迁移性评估/知识漏洞标注。与Agent A并行运行。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "任务书+课程文本",
+          "output_type": "知识结构分析报告"
+        },
+        {
+          "id": "course-deconstruct-cross-review",
+          "name": "交叉审核Agent（Phase 2）",
+          "description": "合并Agent A和B的分析结果，交叉验证一致性，补全或打回缺口。合并为完整分析报告。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "A+B两份报告",
+          "output_type": "合并分析报告+打回清单"
+        },
+        {
+          "id": "course-deconstruct-tool-article",
+          "name": "工具论文案Agent（Agent D）",
+          "description": "基于完整分析报告，从工具论视角生成观点文案。与Agent E、F并行运行。",
+          "standalone": false,
+          "reusable": false,
+          "input_type": "完整分析报告",
+          "output_type": "观点文案"
+        },
+        {
+          "id": "course-deconstruct-leverage-article",
+          "name": "三层杠杆文案Agent（Agent E）",
+          "description": "基于完整分析报告，从三层杠杆视角生成观点文案。与Agent D、F并行运行。",
+          "standalone": false,
+          "reusable": false,
+          "input_type": "完整分析报告",
+          "output_type": "观点文案"
+        },
+        {
+          "id": "course-deconstruct-close-article",
+          "name": "成交四步文案Agent（Agent F）",
+          "description": "基于完整分析报告，从成交四步视角生成观点文案。与Agent D、E并行运行。",
+          "standalone": false,
+          "reusable": false,
+          "input_type": "完整分析报告",
+          "output_type": "观点文案"
+        },
+        {
+          "id": "course-deconstruct-qa",
+          "name": "终检验收Agent（Phase 4）",
+          "description": "三篇全过后做最终质量检查：观点独立性/素材使用/风格一致/篇幅/AI味/标题。调用dbs-ai-check。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "三篇文案+分析报告",
+          "output_type": "终检记录+通过/打回"
+        }
+      ],
+      "dependencies": [
+        "dbs-ai-check"
+      ],
+      "related": [
+        "dbs-deconstruct",
+        "dbs-resonate",
+        "dbs-content",
+        "dbs-spread",
+        "wechat-article-pipeline"
+      ]
+    },
+    "dbs-learning": {
+      "name": "dbs-learning",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-learning/SKILL.md",
+      "description": "dontbesilent 交互式学习。把一个课题拆成连续学习文章，根据用户在上一篇中的反馈调整下一篇的深度、角度和节奏。",
+      "trigger": "/dbs-learning, /dbs-learn, /交互式学习, '带我学一个课题', '继续下一篇'",
+      "category": "learning",
+      "capabilities": [
+        {
+          "id": "dbs-learning-topic-init",
+          "name": "课题初始化",
+          "description": "创建课题目录、学习计划、第一篇学习文章(01.md)。确定存放目录优先级。输入：课题名称。输出：目录+第一篇。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "课题名称",
+          "output_type": "课题目录 + 第一篇"
+        },
+        {
+          "id": "dbs-learning-progress-reading",
+          "name": "学习进度读取",
+          "description": "确认课题目录，读取学习计划，找到最大序号文章，提取学习反馈（只取用户实际填写的内容），总结用户理解状态。输入：课题目录。输出：进度+用户反馈。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "课题目录",
+          "output_type": "进度 + 用户反馈摘要"
+        },
+        {
+          "id": "dbs-learning-gradient-adaptation",
+          "name": "自适应学习梯度判断",
+          "description": "根据用户反馈选择推进方式：没看懂则降低抽象度补例子、觉得没意思则换切入角度、提出应用问题则增加案例、明显掌握则提高概念密度。输入：用户反馈。输出：梯度决策。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "用户反馈",
+          "output_type": "学习梯度决策"
+        },
+        {
+          "id": "dbs-learning-article-generation",
+          "name": "学习文章生成",
+          "description": "按固定结构生成下一篇文章：要解决的问题/正文/小结/下一篇预告/学习反馈区。禁用「不是...而是...」等 6 种句式。输入：梯度决策+上下文。输出：学习文章。",
+          "standalone": false,
+          "reusable": false,
+          "input_type": "梯度决策 + 上下文",
+          "output_type": "学习文章"
+        },
+        {
+          "id": "dbs-learning-plan-update",
+          "name": "学习计划与索引更新",
+          "description": "生成文章后更新学习计划（当前进度/用户反馈摘要/下一篇方向/最近更新时间）和全局索引。输入：新文章信息。输出：更新后的计划。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "新文章信息",
+          "output_type": "更新后的学习计划"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-content"
+      ]
+    },
+    "dbs-hook": {
+      "name": "dbs-hook",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-hook/SKILL.md",
+      "description": "dontbesilent 短视频开头优化。诊断开头问题 + 生成优化方案。",
+      "trigger": "/dbs-hook, /hook, '帮我优化开头', '开头怎么写'",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "dbs-hook-content-quality-check",
+          "name": "内容质量前置诊断",
+          "description": "在优化开头之前先诊断内容本身：内容完整性检查（选题/正文/价值）、素材丰富度检查（数据/故事/金句/权威/痛点 5 维度）、话题范围检查（是否太窄）。素材不足时停止优化。输入：内容+文案。输出：质量判定。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "内容文本",
+          "output_type": "质量判定"
+        },
+        {
+          "id": "dbs-hook-opening-diagnosis",
+          "name": "当前开头诊断",
+          "description": "6 维度诊断当前开头：独立性、Hook、悬念、可信度、口播友好、匹配度。输出诊断报告和 1-2 个核心问题。输入：开头文本。输出：诊断报告。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "开头文本",
+          "output_type": "6 维诊断报告"
+        },
+        {
+          "id": "dbs-hook-solution-generation",
+          "name": "开头优化方案生成",
+          "description": "三种方法生成 10-15 条开头：素材提取（从文案提取高优先级Hook）、素材增补（补充真实数据/案例/反常识结论）、悬念制造（结论改问题）。仅当内容质量通过时执行。输入：诊断结果+内容。输出：10-15条优化方案。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "诊断结果 + 内容文本",
+          "output_type": "10-15 条开头方案"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-content",
+        "dbs-xhs-title"
+      ]
+    },
+    "dbs-resonate": {
+      "name": "dbs-resonate",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-resonate/SKILL.md",
+      "description": "文稿共鸣诊断。用传播心理学框架诊断文稿有没有引起共鸣、哪里出了问题、具体怎么改。",
+      "trigger": "/dbs-resonate, '这个文稿有没有戳中人', '帮我看看能不能发', '这个完播率会不会低'",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "dbs-resonate-core-mechanism",
+          "name": "核心机制审查",
+          "description": "提取文稿所有主张，找出唯一核心机制（如果只能保留一件事是哪件）。如果找不到明确核心则标记「核心不明确」。输入：文稿。输出：核心机制判定。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文稿文本",
+          "output_type": "核心机制判定"
+        },
+        {
+          "id": "dbs-resonate-five-dimension-diagnosis",
+          "name": "五维度共鸣诊断",
+          "description": "5 个传播心理学维度逐一检查：沉默解除（沉默的螺旋）、满足动机（使用与满足理论）、立场框架（框架理论）、传播入口（两级传播）、信念结构（认知一致性）。每个维度给出有效/弱/无效+关联原文说明。输入：文稿。输出：五维诊断。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文稿文本",
+          "output_type": "五维共鸣诊断"
+        },
+        {
+          "id": "dbs-resonate-fix-recommendation",
+          "name": "具体改法输出",
+          "description": "输出含四类改法：删掉什么、缩短为什么（不再作为独立观点）、强化什么（真正的核心如何放大）、保持不动什么。改完后给出核心骨架描述。输入：诊断结果。输出：改法清单。",
+          "standalone": false,
+          "reusable": false,
+          "input_type": "诊断结果",
+          "output_type": "改法清单"
+        },
+        {
+          "id": "dbs-resonate-pattern-recognition",
+          "name": "常见问题模式诊断",
+          "description": "识别 4 种常见诊断模式：核心被稀释（3-6个观点互相干扰）、机制说了但没说清（缺「因为所以」）、立场漂移（开头服务者/中间建议者/结尾教育者）、沉默解除弱（正确但平淡）。输入：文稿。输出：匹配的模式。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文稿文本",
+          "output_type": "模式匹配结果"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-spread",
+        "dbs-hook",
+        "dbs-content"
+      ]
+    },
+    "baoyu-post-to-wechat": {
+      "name": "baoyu-post-to-wechat",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-post-to-wechat/SKILL.md",
+      "description": "Posts content to WeChat Official Account (微信公众号) via API or Chrome CDP. Supports article posting (文章) with HTML, markdown, or plain text input, and image-text posting (贴图, formerly 图文) with multiple i",
+      "trigger": "发布公众号、post to wechat",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "baoyu-post-to-wechat-publish",
+          "name": "发布到微信公众号",
+          "description": "API或Chrome CDP发布文章/贴图到微信公众号",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Markdown/HTML",
+          "output_type": "发布确认"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "baoyu-format-markdown": {
+      "name": "baoyu-format-markdown",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-format-markdown/SKILL.md",
+      "description": "Formats plain text or markdown files with frontmatter, titles, summaries, headings, bold, lists, and code blocks. Use when user asks to \"format markdown\", \"beautify article\", \"add formatting\", or impr",
+      "trigger": "格式化markdown、format markdown",
+      "category": "dev",
+      "capabilities": [
+        {
+          "id": "baoyu-format-markdown-fmt",
+          "name": "Markdown格式化",
+          "description": "自动格式化纯文本为规范Markdown",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "纯文本",
+          "output_type": "格式化Markdown"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "baoyu-comic": {
+      "name": "baoyu-comic",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-comic/SKILL.md",
+      "description": "Knowledge comic creator supporting multiple art styles and tones. Creates original educational comics with detailed panel layouts and batch-capable image generation. Use when user asks to create \"知识漫画",
+      "trigger": "知识漫画、教育漫画、comic",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "baoyu-comic-gen",
+          "name": "知识漫画生成",
+          "description": "多风格知识漫画，详细分格布局，支持批量",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "脚本",
+          "output_type": "漫画PNG"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "dbs-good-question": {
+      "name": "dbs-good-question",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-good-question/SKILL.md",
+      "description": "dontbesilent 好问题生成器。把模糊问题改写成 Agent 可推理、可批评、可验证的问题说明书，并判断自动化解决程度。",
+      "trigger": "/dbs-good-question, /好问题, /问题说明书, /Agent可解性, '这个问题能不能自动化解决'",
+      "category": "thinking",
+      "capabilities": [
+        {
+          "id": "dbs-good-question-input-classification",
+          "name": "输入类型识别",
+          "description": "判断用户输入是模糊问题、现象、材料、自动化请求还是混合输入，决定后续处理路径。输入：用户输入。输出：类型判定。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "类型判定"
+        },
+        {
+          "id": "dbs-good-question-five-checks",
+          "name": "好问题五项检查",
+          "description": "五个维度 0-2 分评分：对象、目标、冲突、约束、反馈。总分 0-10 判定清晰度。默认不展示完整评分表，只输出清晰度和最大缺口。输入：问题。输出：清晰度评分+缺口。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "问题描述",
+          "output_type": "清晰度评分 + 缺口"
+        },
+        {
+          "id": "dbs-good-question-agent-solvability",
+          "name": "Agent 可解性判断",
+          "description": "6 维度（边界/变量/反馈/可检验/可执行/规律稳定）判断自动化程度，输出 A/B/C/D 四档结论。拆出可自动化部分、需人类判断部分、需反馈回流部分。输入：问题说明书。输出：可解性判定。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "问题说明书",
+          "output_type": "可解性判定 A/B/C/D"
+        },
+        {
+          "id": "dbs-good-question-problem-brief",
+          "name": "问题说明书改写",
+          "description": "将用户原问题改写为标准问题说明书：现象/目标/核心冲突/背景事实/约束/反馈入口/Agent 任务。信息不足时写半成品说明书+最小补充问题。输入：原始问题。输出：问题说明书。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "原始问题",
+          "output_type": "问题说明书"
+        },
+        {
+          "id": "dbs-good-question-candidate-explanations",
+          "name": "候选解释生成与批评",
+          "description": "当问题清晰度≥8分或有明确断点时，生成 2-3 个候选解释。每个解释包含机制/可观察信号/排除项/行动变化。用 hard to vary、可检验性、行动指向批评。输入：问题说明书。输出：候选解释+批评。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "问题说明书",
+          "output_type": "候选解释 + 批评"
+        },
+        {
+          "id": "dbs-good-question-next-step",
+          "name": "下一步推荐",
+          "description": "根据问题清晰度和断点情况给出唯一最小下一步：追问/补缺口/低置信候选解释/完整候选解释/自动化拆解。输入：诊断全结果。输出：最小下一步。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "诊断全结果",
+          "output_type": "最小下一步"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-diagnosis",
+        "dbs-content",
+        "dbs-content-system"
+      ]
+    },
+    "鲁大魔skills/ludamo-anli": {
+      "name": "鲁大魔案例库",
+      "type": "local",
+      "path": "~/.agents/skills/鲁大魔skills/ludamo-anli/SKILL.md",
+      "description": "鲁大魔案例模块。内嵌于lianmai，不独立对外入口。   71个真实连麦案例，按13型+自知层+行业+武器链检索。   每个案例体现思维：鲁大魔怎么判的、怎么拉的、怎么给的。   Embedded case module. Called by lianmai during answer delivery.",
+      "trigger": "/案例, 找案例, 类比",
+      "category": "reference",
+      "capabilities": [
+        {
+          "id": "case-lookup",
+          "name": "案例检索",
+          "description": "按类型/概念/行业检索案例",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "检索条件",
+          "output_type": "案例列表"
+        },
+        {
+          "id": "case-concept-map",
+          "name": "案例概念映射",
+          "description": "将案例映射到概念体系",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "案例+概念",
+          "output_type": "映射关系"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "鲁大魔skills/ludamo-lianmai",
+        "鲁大魔skills/ludamo-xuexi"
+      ]
+    },
+    "shortvideo-transform-engine": {
+      "name": "shortvideo-transform-engine",
+      "type": "agent",
+      "path": "~/.agents/skills/shortvideo-transform-engine/SKILL.md",
+      "description": "Transform架构权重计算引擎。按组合度40%+结构40%+频率20%公式计算25标签权重矩阵，生成五星评级。模拟Transformer多头注意力机制。",
+      "trigger": "/计算权重、/transform、权重矩阵、打星",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "sv-transform-frequency",
+          "name": "频率因子计算(20%)",
+          "description": "计算每个标签的log归一化出现频率。f=log(1+出现次数)/log(1+总报告数)。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "汇总数据",
+          "output_type": "频率得分"
+        },
+        {
+          "id": "sv-transform-cooccurrence",
+          "name": "组合度因子计算(40%)",
+          "description": "构建25x25共现矩阵，计算每个标签与其他标签的共现边数。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "汇总数据",
+          "output_type": "共现矩阵"
+        },
+        {
+          "id": "sv-transform-structure",
+          "name": "结构复杂度因子计算(40%)",
+          "description": "计算标签子结构变体数+跨Gate分布广度。识别同一标签的不同实现方式。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "汇总数据",
+          "output_type": "结构得分"
+        },
+        {
+          "id": "sv-transform-weight-matrix",
+          "name": "权重矩阵生成",
+          "description": "综合三因子计算每个标签的综合得分(w=0.2f_freq+0.4f_cooc+0.4f_struct)。输出权重矩阵CSV。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "三因子得分",
+          "output_type": "权重矩阵CSV"
+        },
+        {
+          "id": "sv-transform-star-rating",
+          "name": "星级评定映射",
+          "description": "按五档阈值(85%/70%/50%/30%/10%)将综合得分映射到1-5星。输出星级评定总表。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "权重矩阵",
+          "output_type": "星级评定表"
+        },
+        {
+          "id": "sv-transform-head-ranking",
+          "name": "四头内排名",
+          "description": "在每个头(思维/语言/传播/词)内部对子标签排名。输出核心/重要/辅助三类标签。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "权重矩阵",
+          "output_type": "头内排名表"
+        }
+      ],
+      "dependencies": [
+        "shortvideo-dimension-extractor"
+      ],
+      "related": [
+        "shortvideo-dimension-extractor",
+        "shortvideo-pipeline-qa"
+      ]
+    },
+    "鲁大魔skills/ludamo-xuexi": {
+      "name": "鲁大魔学习系统",
+      "type": "local",
+      "path": "~/.agents/skills/鲁大魔skills/ludamo-xuexi/SKILL.md",
+      "description": "鲁大魔商业思维学习系统。互动式，轻风格。概念翻转→原则→流程→自查。   触发：/鲁大魔-学习、「供应链什么意思」「阶段怎么判断」「学鲁大魔」   Lu DaMo business thinking learning. Concept flip → principles → flows → checklist.",
+      "trigger": "/学习, 学概念, 教教我, XX什么意思",
+      "category": "learning",
+      "capabilities": [
+        {
+          "id": "concept-lookup",
+          "name": "概念索引",
+          "description": "查找鲁大魔商业概念",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "概念名",
+          "output_type": "概念定义"
+        },
+        {
+          "id": "learning-path",
+          "name": "学习路径",
+          "description": "生成概念学习路径",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "学习目标",
+          "output_type": "学习路线"
+        },
+        {
+          "id": "concept-teaching",
+          "name": "概念教学",
+          "description": "定位概念至自查六步教学",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "概念",
+          "output_type": "教学内容"
+        }
+      ],
+      "dependencies": [
+        "鲁大魔skills/ludamo-anli"
+      ],
+      "related": [
+        "鲁大魔skills/ludamo",
+        "鲁大魔skills/ludamo-lianmai"
+      ]
+    },
+    "dbs-ai-check": {
+      "name": "dbs-ai-check",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-ai-check/SKILL.md",
+      "description": "dontbesilent AI 写作特征识别。扫描文案中的 AI 生成痕迹，输出检测报告。默认只诊断不改。",
+      "trigger": "/dbs-ai-check, /AI检测, '帮我看看有没有 AI 味', '检测一下 AI 特征'",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "dbs-ai-check-detection",
+          "name": "AI 特征识别扫描",
+          "description": "对用户文案逐条扫描 22 个 AI 写作特征（堵反驳、知识输出、匀速排比、让步模板、命名仪式、情绪光滑等），按文本顺序输出检测报告，每处引用原文并标注严重度。输入：文案文本。输出：特征检测报告。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文本",
+          "output_type": "检测报告"
+        },
+        {
+          "id": "dbs-ai-check-genre-identification",
+          "name": "体裁识别与误伤防范",
+          "description": "检测前判断文案体裁（短视频、公众号长文、推文、学术），不同体裁有不同判定标准。提供 5 种误伤警告的触发阈值。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "文本",
+          "output_type": "体裁判定"
+        },
+        {
+          "id": "dbs-ai-check-rewrite-guide",
+          "name": "改写引导",
+          "description": "用户要求改写时，按命中特征严重度从高到低逐条追问特征背后的意图，让用户自己找到表达方式。22 个特征各有一个追问映射表。不直接改写，只提供修改方向。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "检测报告",
+          "output_type": "改写引导"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-content",
+        "dbs-hook"
+      ]
+    },
+    "dbs-report": {
+      "name": "dbs-report",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-report/SKILL.md",
+      "description": "把多次 dbs-save 攒下来的诊断状态合并成一份可交付的 markdown 报告。",
+      "trigger": "/dbs-report, /出报告, '打包', '整理一份', '给合伙人看的'",
+      "category": "state-management",
+      "capabilities": [
+        {
+          "id": "dbs-report-data-check",
+          "name": "存档数据检查",
+          "description": "按项目检查存档数量。0 个提示先存档，1 个提示单份不需要合并，≥2 个进入合并。支持 --since 日期过滤和 --slug 项目指定。输入：项目名。输出：存档统计。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "项目名",
+          "output_type": "存档统计"
+        },
+        {
+          "id": "dbs-report-merge",
+          "name": "多存档合并与报告生成",
+          "description": "按时间排序解析所有存档，合并成 6 段结构报告：用户主诉演进/已确认结论（去重+标注修正）/已否决方向/未解决问题/推荐下一步/存档索引。文件永不覆盖，带时间戳。输入：存档文件集。输出：合并报告。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "存档文件集",
+          "output_type": "合并报告"
+        }
+      ],
+      "dependencies": [
+        "dbs-save"
+      ],
+      "related": [
+        "dbs",
+        "dbs-save",
+        "dbs-restore",
+        "dbs-wechat-html"
+      ]
+    },
+    "frontend-design": {
+      "name": "frontend-design",
+      "type": "agent",
+      "path": "~/.agents/skills/frontend-design/SKILL.md",
+      "description": "Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.",
+      "trigger": "User is building new UI, reshaping existing design, asking about visual direction, typography, palette, layout, or any aesthetic decision.",
+      "category": "design",
+      "capabilities": [
+        {
+          "id": "design-brief-clarification",
+          "name": "设计简报澄清与主题研究",
+          "description": "当简报不明确时，钉住具体的主题、受众和页面唯一任务。研究主题的世界（材料、工具、器物、行话）以获取独特的设计选择。输入：模糊简报。输出：明确的设计目标。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "设计简报"
+        },
+        {
+          "id": "visual-identity-token-system",
+          "name": "视觉标识 Token 系统",
+          "description": "创建四组件设计 Token 系统：调色板（4-6 色）、字体角色（展示+正文+辅助）、布局概念（一句话+ASCII线框图）、签名元素（一个独特的记忆点）。输入：设计简报。输出：Token 方案。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "设计简报",
+          "output_type": "设计 Token 方案"
+        },
+        {
+          "id": "design-self-critique",
+          "name": "设计自我批评",
+          "description": "在编码前审查设计方案是否过于通用/模板化。对比方案与同类页面默认做法，识别并修正非独特元素。输入：设计方案+简报。输出：修正后的方案。",
+          "standalone": true,
+          "reusable": false,
+          "input_type": "设计方案 + 简报",
+          "output_type": "修正后的方案"
+        },
+        {
+          "id": "typography-system-design",
+          "name": "排版系统设计",
+          "description": "选择和搭配字体（避免默认字体），设定清晰的字阶、字重、字宽和间距。让排版本身成为设计记忆点。输入：设计方案。输出：排版系统。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "设计方案",
+          "output_type": "排版系统"
+        },
+        {
+          "id": "motion-design-planning",
+          "name": "动效设计规划",
+          "description": "规划动画策略：页面加载序列、滚动触发揭示、悬停微交互、环境氛围。动效服务主题而非装饰。输入：设计方案。输出：动效规格。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "设计方案",
+          "output_type": "动效规格"
+        },
+        {
+          "id": "ux-copywriting",
+          "name": "UX 文案撰写",
+          "description": "撰写以用户为中心的界面文案：简洁、主动语态、具体。使用句首大写、平实动词、一致词汇。处理错误状态和空状态。输入：UI 上下文。输出：可用文案。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "UI 上下文",
+          "output_type": "界面文案"
+        },
+        {
+          "id": "css-selector-architecture",
+          "name": "CSS 选择器架构指导",
+          "description": "指导 CSS 选择器结构，避免特异性冲突、类取消（如 .section vs .cta）和级联问题。输入：组件层级。输出：选择器策略。",
+          "standalone": true,
+          "reusable": false,
+          "input_type": "组件层级",
+          "output_type": "选择器策略"
+        },
+        {
+          "id": "accessible-responsive-baseline",
+          "name": "可访问性与响应式基准",
+          "description": "确保设计满足质量底线：响应至移动端、可见键盘焦点指示器、尊重 prefers-reduced-motion。输入：已完成设计。输出：合规检查。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "HTML/CSS",
+          "output_type": "合规检查清单"
+        },
+        {
+          "id": "structured-information-design",
+          "name": "结构化信息与布局设计",
+          "description": "设计编码内容真实属性的结构装置（编号、眉标、分隔、标签、分区），而非纯装饰。批评默认选择如 01/02/03 编号仅在内容真有顺序时使用。输入：内容+布局。输出：结构装置方案。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "内容 + 布局需求",
+          "output_type": "结构装置方案"
+        }
+      ],
+      "dependencies": [],
+      "related": []
+    },
+    "鲁大魔skills/ludamo": {
+      "name": "鲁大魔AI总入口",
+      "type": "local",
+      "path": "~/.agents/skills/鲁大魔skills/ludamo/SKILL.md",
+      "description": "鲁大魔AI总入口。识别意图，路由到学习系统或诊断管道。   触发：/鲁大魔、任何鲁大魔相关查询   Lu DaMo AI entry. Routes to xuexi (learning) or lianmai (diagnosis).",
+      "trigger": "/鲁大魔, 鲁大魔相关查询",
+      "category": "routing",
+      "capabilities": [
+        {
+          "id": "ludamo-route",
+          "name": "意图路由",
+          "description": "识别用户意图，路由到xuexi或lianmai",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "路由决策"
+        }
+      ],
+      "dependencies": [
+        "鲁大魔skills/ludamo-xuexi",
+        "鲁大魔skills/ludamo-lianmai"
+      ],
+      "related": [
+        "鲁大魔skills/ludamo-anli"
+      ]
+    },
+    "shortvideo-pipeline-qa": {
+      "name": "shortvideo-pipeline-qa",
+      "type": "agent",
+      "path": "~/.agents/skills/shortvideo-pipeline-qa/SKILL.md",
+      "description": "多Agent流水线独立验收官。零上下文重叠，独立读取输出文件，逐项判定PASS/FAIL。L1-L5五层验收标准。",
+      "trigger": "/QA验收、/验收、独立验收、质检、交叉验证",
+      "category": "workflow",
+      "capabilities": [
+        {
+          "id": "sv-qa-standards",
+          "name": "验收标准加载与清单生成",
+          "description": "根据验收层级(L1-L5)加载对应标准清单，生成逐项检查表。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "验收层级",
+          "output_type": "检查清单"
+        },
+        {
+          "id": "sv-qa-inspect",
+          "name": "独立文件检查",
+          "description": "从文件系统独立读取输出文件，不依赖执行Agent内存。逐项判定PASS/FAIL。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件路径+标准",
+          "output_type": "判定表"
+        },
+        {
+          "id": "sv-qa-fail-report",
+          "name": "不合格项报告与修改建议",
+          "description": "每个FAIL引用被违反的标准条款原文+可操作修改建议。最多重验3次。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "FAIL清单",
+          "output_type": "修改建议"
+        },
+        {
+          "id": "sv-qa-cross-validation",
+          "name": "交叉验证",
+          "description": "两份独立QA报告对比，一致性>=90%通过。抽样反向验证原始数据。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "两份QA报告",
+          "output_type": "一致性评分"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "shortvideo-multiagent-coordinator",
+        "shortvideo-dimension-extractor",
+        "shortvideo-transform-engine"
+      ]
+    },
+    "baoyu-diagram": {
+      "name": "baoyu-diagram",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-diagram/SKILL.md",
+      "description": "Create professional, dark-themed SVG diagrams of any type — architecture diagrams, flowcharts, sequence diagrams, structural diagrams, mind maps, timelines, illustrative/conceptual diagrams, and more.",
+      "trigger": "画图、diagram、架构图、流程图、思维导图",
+      "category": "dev",
+      "capabilities": [
+        {
+          "id": "baoyu-diagram-svg",
+          "name": "SVG架构图/流程图",
+          "description": "专业深色主题SVG：架构图、流程图、时序图、思维导图等",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "描述",
+          "output_type": "SVG文件"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "baoyu-markdown-to-html": {
+      "name": "baoyu-markdown-to-html",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-markdown-to-html/SKILL.md",
+      "description": "Converts Markdown to styled HTML with WeChat-compatible themes. Supports code highlighting, math, Mermaid (rendered to PNG via headless Chrome), PlantUML, footnotes, alerts, infographics, and optional",
+      "trigger": "markdown转html、md转html、微信排版",
+      "category": "dev",
+      "capabilities": [
+        {
+          "id": "baoyu-markdown-to-html-convert",
+          "name": "Markdown转微信HTML",
+          "description": "WeChat兼容HTML，代码高亮/数学公式/Mermaid/脚注/引用",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Markdown",
+          "output_type": "HTML"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "dbs-spread": {
+      "name": "dbs-spread",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-spread/SKILL.md",
+      "description": "传播心理解码。用 5 个经典传播学理论解码内容为什么能引起受众共鸣，输出聊天室讨论方向。",
+      "trigger": "/dbs-spread, '传播心理解码', '为什么这个能火', '受众想听什么', '这个内容打中了什么情绪'",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "dbs-spread-five-theory-analysis",
+          "name": "五理论传播心理分析",
+          "description": "逐理论分析：沉默的螺旋（受众憋着什么不敢说）、使用与满足（满足什么心理需求）、框架理论（立场为什么有效）、两级传播（谁会第一个传及动机）、认知一致性（确认什么信念+挑战什么行为）。每个理论一句话判断+一句话理论依据。输入：内容文本。输出：五维分析。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "内容文本",
+          "output_type": "五维传播心理分析"
+        },
+        {
+          "id": "dbs-spread-synthesis",
+          "name": "综合推导",
+          "description": "基于五维度分析推导出：受众情绪底层、有效立场（具体到谁那边）、受众还想听什么（同一情绪频道方向）、聊天室讨论方向。每条推导必须有来源标注。输入：五维分析结果。输出：综合推导。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "五维分析结果",
+          "output_type": "综合推导报告"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-resonate",
+        "dbs-chatroom",
+        "dbs-hook",
+        "dbs-content"
+      ]
+    },
+    "skill-creator": {
+      "name": "skill-creator",
+      "type": "agent",
+      "path": "~/.agents/skills/skill-creator/SKILL.md",
+      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill.",
+      "trigger": "User wants to create/edit/improve a skill, run evals, benchmark, or optimize description.",
+      "category": "meta",
+      "capabilities": [
+        {
+          "id": "skill-intent-capture",
+          "name": "Skill 意图捕获与访谈",
+          "description": "访谈用户以捕获 Skill 应该让 Claude 做什么、何时触发、期望输出格式、是否需要测试用例。从对话历史提取现有工作流。输入：对话上下文/用户回答。输出：Skill 规格说明。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "Skill 规格说明"
+        },
+        {
+          "id": "skill-drafting",
+          "name": "SKILL.md 起草",
+          "description": "编写完整的 SKILL.md 文件（YAML frontmatter + markdown body）。应用渐进式披露：主体 <500 行，用 scripts/references/assets 存放深层内容。输入：Skill 规格。输出：SKILL.md。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Skill 规格说明",
+          "output_type": "SKILL.md"
+        },
+        {
+          "id": "test-case-authoring",
+          "name": "测试用例编写与 Eval 集创建",
+          "description": "创建 2-3 个真实测试 prompt 存入 evals/evals.json。判断输出是否客观可验证（适合文件转换/数据提取/代码生成）还是主观需要人工判断。输入：Skill 规格。输出：测试用例集。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Skill 规格",
+          "output_type": "Eval 测试集"
+        },
+        {
+          "id": "parallel-subagent-execution",
+          "name": "并行 Subagent 执行",
+          "description": "每个测试用例并行启动两个 subagent：有 Skill 和无 Skill（基线）。输出路由到有组织的工作区目录。输入：测试用例+Skill。输出：执行结果。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "测试用例 + Skill",
+          "output_type": "并行执行结果"
+        },
+        {
+          "id": "automated-grading",
+          "name": "自动评分",
+          "description": "对每个测试用例输出按其断言评分，生成 grading.json。优先使用脚本评分以保证可靠性和可复用性。输入：测试输出+断言。输出：评分结果。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "测试输出 + 断言",
+          "output_type": "评分结果"
+        },
+        {
+          "id": "benchmark-aggregation",
+          "name": "基准聚合与统计分析",
+          "description": "运行脚本生成 benchmark.json 和 benchmark.md，包含通过率、时间、Token 数、均值±标准差、有 Skill vs 无 Skill 的 delta。输入：评分数据。输出：基准报告。",
+          "standalone": true,
+          "reusable": false,
+          "input_type": "评分数据",
+          "output_type": "基准报告"
+        },
+        {
+          "id": "results-analysis",
+          "name": "基准结果分析",
+          "description": "分析基准数据揭示聚合统计隐藏的模式：非区分性断言、高方差 Eval、时间/Token 权衡。输入：基准数据。输出：洞察叙述。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "基准数据",
+          "output_type": "洞察报告"
+        },
+        {
+          "id": "feedback-loop-iteration",
+          "name": "反馈驱动迭代循环",
+          "description": "读取用户反馈，识别具体投诉与默认认可，将反馈归纳为 Skill 改进，避免对个别示例过拟合，触发下一轮迭代。输入：反馈。输出：改进后的 Skill。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "用户反馈",
+          "output_type": "改进后的 Skill"
+        },
+        {
+          "id": "skill-improvement-refinement",
+          "name": "Skill 内容改进与精炼",
+          "description": "四种改进策略：从反馈归纳（不过拟合）、保持 prompt 精简（删除非贡献内容）、解释「为什么」而非刚性 MUST/ALWAYS、将重复脚本合并到 scripts/ 目录。输入：Skill+反馈。输出：精炼后的 Skill。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Skill + 反馈",
+          "output_type": "精炼后的 Skill"
+        },
+        {
+          "id": "description-optimization",
+          "name": "Skill 描述优化（触发精度）",
+          "description": "生成 20 个触发 Eval 查询（应触发和不应触发的混合），通过迭代测试优化 description 以提高触发准确率。输入：Skill。输出：优化后的 description。",
+          "standalone": true,
+          "reusable": false,
+          "input_type": "Skill",
+          "output_type": "优化后的 description"
+        },
+        {
+          "id": "skill-packaging",
+          "name": "Skill 打包为 .skill 文件",
+          "description": "使用 scripts/package_skill.py 将完整 Skill 目录打包为 .skill 文件用于分发和安装。输入：Skill 目录。输出：.skill 文件。",
+          "standalone": true,
+          "reusable": false,
+          "input_type": "Skill 目录",
+          "output_type": ".skill 文件"
+        },
+        {
+          "id": "platform-adaptation",
+          "name": "平台适配工作流",
+          "description": "将整个 Skill 创建工作流适配到当前平台：Claude Code（完整工作流+subagent+浏览器查看器）、Cowork（subagent+静态 HTML）、Claude.ai（无 subagent+顺序测试）。输入：平台标识。输出：适配的工作流。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "平台标识",
+          "output_type": "适配后的工作流"
+        }
+      ],
+      "dependencies": [
+        "Python 3",
+        "npx skills CLI",
+        "claude CLI"
+      ],
+      "related": [
+        "find-skills"
+      ]
+    },
+    "baoyu-compress-image": {
+      "name": "baoyu-compress-image",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-compress-image/SKILL.md",
+      "description": "Compresses images to WebP (default) or PNG with automatic tool selection. Use when user asks to \"compress image\", \"optimize image\", \"convert to webp\", or reduce image file size.",
+      "trigger": "压缩图片、compress image",
+      "category": "dev",
+      "capabilities": [
+        {
+          "id": "baoyu-compress-image-opt",
+          "name": "图片压缩",
+          "description": "压缩为WebP/PNG，自动选择工具",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "图片文件",
+          "output_type": "压缩图片"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "shortvideo-multiagent-coordinator": {
+      "name": "shortvideo-multiagent-coordinator",
+      "type": "agent",
+      "path": "~/.agents/skills/shortvideo-multiagent-coordinator/SKILL.md",
+      "description": "短视频知识库Transform多Agent协调器。总控7类Agent执行顺序、依赖管理、状态追踪、QA集成、故障恢复。基于JSON状态文件驱动。",
+      "trigger": "/启动拆解系统、开始知识库拆解、启动transform流水线、/coordinator",
+      "category": "workflow",
+      "capabilities": [
+        {
+          "id": "sv-coordinator-init",
+          "name": "环境初始化与执行计划生成",
+          "description": "确认目录结构、创建状态文件、计算并行度、输出执行计划。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "路径配置",
+          "output_type": "执行计划"
+        },
+        {
+          "id": "sv-coordinator-dispatch",
+          "name": "任务分派与并行度管理",
+          "description": "按Agent依赖图顺序分派任务。Agent 2自动计算并行度(min(8, ceil(N/25)))。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "任务队列",
+          "output_type": "分派结果"
+        },
+        {
+          "id": "sv-coordinator-dependency",
+          "name": "依赖管理与阻塞检测",
+          "description": "管理Agent间输入输出依赖。自动检测阻塞，释放下游依赖。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Agent状态",
+          "output_type": "依赖图更新"
+        },
+        {
+          "id": "sv-coordinator-state",
+          "name": "状态追踪与中断续跑",
+          "description": "维护workflow-state.json。每次Agent完成后写入。支持/pause、/resume、/pickup。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "事件",
+          "output_type": "状态文件更新"
+        },
+        {
+          "id": "sv-coordinator-qa",
+          "name": "QA集成与自动触发",
+          "description": "每个Agent输出后自动触发独立QA验收。PASS释放依赖，FAIL触发重试(最多3次)。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Agent完成事件",
+          "output_type": "QA触发+结果"
+        },
+        {
+          "id": "sv-coordinator-recovery",
+          "name": "故障恢复与容错",
+          "description": "处理6种故障场景：超时/连续FAIL/用户中断/单Agent失败/状态损坏/文件占用。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "故障事件",
+          "output_type": "恢复操作"
+        },
+        {
+          "id": "sv-coordinator-synthesis",
+          "name": "最终合成与交付",
+          "description": "汇总所有Agent输出，生成8项最终交付物：知识图谱/权重矩阵/星级手册/思维结构手册/语言结构手册/词词典/组合模式库/监管日志。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "所有Agent输出",
+          "output_type": "8项交付物"
+        }
+      ],
+      "dependencies": [
+        "shortvideo-dimension-extractor",
+        "shortvideo-transform-engine",
+        "shortvideo-pipeline-qa"
+      ],
+      "related": [
+        "dbs-content-system",
+        "dbs-report",
+        "course-deconstruct",
+        "wechat-article-pipeline"
+      ]
+    },
+    "dbs-chatroom": {
+      "name": "dbs-chatroom",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-chatroom/SKILL.md",
+      "description": "定向聊天室：根据话题推荐或接受用户指定的专家，模拟多角色对话。",
+      "trigger": "/dbs-chatroom, /定向聊天室, '定向聊天室'",
+      "category": "thinking",
+      "capabilities": [
+        {
+          "id": "dbs-chatroom-expert-recommendation",
+          "name": "专家推荐",
+          "description": "根据话题推荐 3-5 位专家，优先选有稳定方法框架、能补关键变量、能形成分工/分歧/校正关系的人。排除纯表达类 KOL。输入：话题描述。输出：专家名单 + 理由。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "专家推荐列表"
+        },
+        {
+          "id": "dbs-chatroom-parallel-agents",
+          "name": "多角色并行对话生成",
+          "description": "使用 Agent tool 并行调用多个专家 Agent，每个专家有定制的思考方式、诚实规则和说话风格，200 字左右输出。输入：专家配置。输出：多角色对话。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "专家配置",
+          "output_type": "多角色对话"
+        },
+        {
+          "id": "dbs-chatroom-judge-summary",
+          "name": "判官总结",
+          "description": "Claude 作为判官总结讨论质量（真洞察、交锋）、补盲区、给出可执行建议 2-3 条。输入：完整对话。输出：判官总结。",
+          "standalone": true,
+          "reusable": false,
+          "input_type": "多角色对话",
+          "output_type": "判官总结"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-chatroom-austrian",
+        "dbs-spread"
+      ]
+    },
+    "dbs-decision": {
+      "name": "dbs-decision",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-decision/SKILL.md",
+      "description": "dontbesilent 个人决策系统。把任何一个需要长期跟踪的领域做成本地知识工程：四层结构、来源标签、写完不改的快照、能炼出规律的概念库。",
+      "trigger": "/dbs-decision, /决策系统, /决策立案, /结果回填, /状态画像",
+      "category": "state-management",
+      "capabilities": [
+        {
+          "id": "dbs-decision-init",
+          "name": "初始化决策系统",
+          "description": "建立四层决策系统目录骨架（01_事实/02_规律/03_定格/04_待解），写入 AGENTS.md/SOURCE_OF_TRUTH.md。支持隐私模式（代号+commit黑名单）。输入：领域描述。输出：目录骨架+规则文件。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "目录结构 + 规则文件"
+        },
+        {
+          "id": "dbs-decision-status-update",
+          "name": "更新当前状态",
+          "description": "读取和更新 我的当前状态.md，把新信息按类型分发到四层目录。支持综合画像模式，来源标签强制标注。输入：新信息。输出：更新的状态文件。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "更新的状态文件"
+        },
+        {
+          "id": "dbs-decision-case-filing",
+          "name": "决策立案",
+          "description": "遇到 5 种重大决策时建立标准决策事件文件，同时更新 4 个地方。输入：决策内容。输出：决策事件文件。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "决策事件文件"
+        },
+        {
+          "id": "dbs-decision-result-backfill",
+          "name": "结果回填",
+          "description": "把实际结果回填到对应决策事件文件，同步更新事实、当前状态和待解清单。结果可修正规律但不重写原段。输入：实际结果。输出：更新后的决策记录。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "实际结果",
+          "output_type": "更新后的决策记录"
+        },
+        {
+          "id": "dbs-decision-snapshot",
+          "name": "状态画像/阶段快照",
+          "description": "在 03_定格/ 下创建不可修改的快照文件（月度状态画像、事件分析、对象排序等）。写完不改，情况变化就新建新版本。输入：当前状态。输出：快照文件。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "状态数据",
+          "output_type": "快照文件"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-save",
+        "dbs-restore",
+        "dbs-report"
+      ]
+    },
+    "dbs-slowisfast": {
+      "name": "dbs-slowisfast",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-slowisfast/SKILL.md",
+      "description": "dontbesilent 慢就是快。帮创业者找到看起来更慢但长期更快的方法，用摩擦建造资产。",
+      "trigger": "/dbs-slowisfast, /慢就是快, '有没有更慢的方法', '我是不是太快了'",
+      "category": "thinking",
+      "capabilities": [
+        {
+          "id": "dbs-slowisfast-scene-reception",
+          "name": "场景接收与方法判断",
+          "description": "接收用户当前做事方法或方向，判断用户给了具体方法还是只有方向，通过追问锁定需要诊断的环节。输入：用户描述。输出：诊断焦点。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "诊断焦点"
+        },
+        {
+          "id": "dbs-slowisfast-fast-audit",
+          "name": "快方法三项审计",
+          "description": "三个检测：摩擦检测（关键摩擦是否被绕开）、资产检测（做完留下什么可复利的）、复利检测（下次会不会更容易）。每项输出 🔴/⚠️/✅ 结果。输入：当前方法。输出：三项审计结果。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "当前方法描述",
+          "output_type": "三项审计结果"
+        },
+        {
+          "id": "dbs-slowisfast-slow-recommendation",
+          "name": "慢方法推荐",
+          "description": "根据审计结果推荐 2-3 个具体慢方法替代方案。包含 7 种常见慢方法场景映射。只推荐判断密集型环节的慢做法，机械执行环节该快就快。输入：审计结果。输出：慢方法推荐。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "审计结果",
+          "output_type": "慢方法推荐"
+        },
+        {
+          "id": "dbs-slowisfast-report",
+          "name": "慢方法诊断报告输出",
+          "description": "输出结构化报告：当前方法/三项检测结果/慢方法推荐（怎么做+慢在哪+摩擦在哪+建造什么资产+多久见效）/不要慢做的部分/犀利总结。输入：全部分析。输出：诊断报告。",
+          "standalone": false,
+          "reusable": false,
+          "input_type": "全部分析结果",
+          "output_type": "诊断报告"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-action",
+        "dbs-benchmark",
+        "dbs-diagnosis"
+      ]
+    },
+    "baoyu-translate": {
+      "name": "baoyu-translate",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-translate/SKILL.md",
+      "description": ">-",
+      "trigger": "翻译、translate、精翻",
+      "category": "dev",
+      "capabilities": [
+        {
+          "id": "baoyu-translate-modes",
+          "name": "三模式翻译",
+          "description": "快速/标准/精翻，支持自定义术语表",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文本/URL",
+          "output_type": "翻译文本"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "dbs-diagnosis": {
+      "name": "dbs-diagnosis",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-diagnosis/SKILL.md",
+      "description": "dontbesilent 商业模式诊断。两种模式：问诊（消解你的问题）和体检（拆解你的商业模式）。",
+      "trigger": "/dbs-diagnosis, /问诊, '帮我看看商业模式', '诊断一下我的业务', '我有个商业问题'",
+      "category": "business",
+      "capabilities": [
+        {
+          "id": "dbs-diagnosis-consultation-mode",
+          "name": "问诊模式（五层消解漏斗）",
+          "description": "五层消解漏斗：语言陷阱检测(25%) → 假设错误检测(25%) → 逻辑错误检测(20%) → 事实前提核查(1.5%) → 信息充分性判断(2.5%)。只有通过全部 5 层的 1% 才进入真问题解答。每层停下来与用户对话。输入：用户问题。输出：消解结果或真问题。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言问题",
+          "output_type": "消解结果/真问题"
+        },
+        {
+          "id": "dbs-diagnosis-checkup-mode",
+          "name": "体检模式（七项商业模式检验）",
+          "description": "七项检验：印钞机检验、道德检验、定价检验、需求检验、流量-变现关系检验、规模化检验、成长层级判断（7层）。每项检验完停下来与用户对话。输入：业务描述。输出：七项检验结果。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "业务描述",
+          "output_type": "七项检验报告"
+        },
+        {
+          "id": "dbs-diagnosis-question-classification",
+          "name": "问题分类",
+          "description": "将用户问题分为三类：纯信息获取类(10%，直接回答)、情绪宣泄类(15%，转介 dbs-action)、复杂问题(75%，进入消解漏斗)。输入：用户问题。输出：分类结果。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言问题",
+          "output_type": "问题分类"
+        },
+        {
+          "id": "dbs-diagnosis-true-answer",
+          "name": "真问题解答",
+          "description": "对活过消解漏斗的 1% 真问题按类型解答：逻辑推导型(0.4%)用框架推导、价值选择型(0.3%)利弊分析+给出判断、资源约束型(0.2%)基于资源条件建议。输入：真问题。输出：解答。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "真问题",
+          "output_type": "解答"
+        },
+        {
+          "id": "dbs-diagnosis-signal-tracking",
+          "name": "全程心理信号追踪",
+          "description": "在整个对话中持续观察心理问题信号（知道做但不做、反复切换方向等）和思维品质信号（能推回判断、能定义词、能区分想法和事实）。输入：对话过程。输出：信号记录。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "对话",
+          "output_type": "信号记录"
+        },
+        {
+          "id": "dbs-diagnosis-premise-challenge",
+          "name": "前提挑战（YC 式）",
+          "description": "在输出诊断报告前强制执行前提挑战：对比方案、成熟度信号追踪、强制任务（明天第一件事是什么）。输入：诊断中间结果。输出：挑战结论。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "诊断中间结果",
+          "output_type": "挑战结论"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-action",
+        "dbs-benchmark",
+        "dbs-deconstruct",
+        "dbs-goal",
+        "dbs-good-question"
+      ]
+    },
+    "dbs-agent-migration": {
+      "name": "dbs-agent-migration",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-agent-migration/SKILL.md",
+      "description": "Agent 工作台迁移。把任意项目整理成 Claude Code / Codex / Grok 三端一致、可长期维护的 Agent 工作台。",
+      "trigger": "/dbs-agent-migration, /agent迁移, '迁移到 Codex', '统一 AGENTS.md', '整理 skill bridge'",
+      "category": "state-management",
+      "capabilities": [
+        {
+          "id": "dbs-agent-migration-audit",
+          "name": "迁移审计",
+          "description": "检查 CLAUDE.md、AGENTS.md、SOURCE_OF_TRUTH.md、skills/ 目录和三端 bridge 的存在性与完整性，将项目判定为 A/B/C/D 四类规则层类型。输入：项目目录。输出：审计报告。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件目录",
+          "output_type": "审计报告"
+        },
+        {
+          "id": "dbs-agent-migration-rule-files",
+          "name": "规则文件迁移",
+          "description": "拆出平台无关规则写入 AGENTS.md，保留宿主专属规则，创建/补齐 CLAUDE.md 和 SOURCE_OF_TRUTH.md。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件",
+          "output_type": "规则文件"
+        },
+        {
+          "id": "dbs-agent-migration-skill-discovery",
+          "name": "Skill 真源识别与收编",
+          "description": "扫描项目发现 SKILL.md 候选文件，排除非 skill 文档，生成候选真源清单，建立项目级 skills/ 目录。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件目录",
+          "output_type": "Skill 清单"
+        },
+        {
+          "id": "dbs-agent-migration-naming",
+          "name": "统一命名与 frontmatter",
+          "description": "统一所有 skill 的 name、description、bridge 规范名，回写真源 frontmatter，确保三端一致。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "SKILL.md 文件",
+          "output_type": "规范化的 SKILL.md"
+        },
+        {
+          "id": "dbs-agent-migration-bridge-gen",
+          "name": "三端 Bridge 生成",
+          "description": "为 Claude Code / Codex / Grok 三端生成薄 bridge 文件。Bridge 只做入口指向，不维护长逻辑。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Skill 列表",
+          "output_type": "Bridge 文件"
+        },
+        {
+          "id": "dbs-agent-migration-verification",
+          "name": "迁移验证",
+          "description": "验证 AGENTS.md 独立性、真源明确性、frontmatter 完整性、bridge 回指正确性、三端集合一致性。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "迁移后的项目",
+          "output_type": "验证报告"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-content-system"
+      ]
+    },
+    "dbs-content": {
+      "name": "dbs-content",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-content/SKILL.md",
+      "description": "dontbesilent 内容创作诊断。选题通过后，诊断怎么把这个选题做成好内容。",
+      "trigger": "/dbs-content, /内容诊断, '这个内容怎么做', '帮我看看这个文案'",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "dbs-content-form-matching",
+          "name": "内容形式匹配",
+          "description": "根据选题特性判断最适合的内容形式和平台（短视频/图文/长视频/直播/文章 × 小红书/抖音/X/公众号），含平台匹配规则。输入：选题内容。输出：推荐形式+平台。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "选题文本",
+          "output_type": "形式+平台推荐"
+        },
+        {
+          "id": "dbs-content-five-dimension-diagnosis",
+          "name": "五维内容诊断",
+          "description": "从五个维度诊断内容：文字洁癖检测（AI味/干货陷阱）、封面/标题诊断（吸引力/认知劫持）、表达效率检测（核心观点清晰度）、认知落差检测（与同行差异）、AI 辅助创作建议。输入：内容文本。输出：五维诊断。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "内容文本",
+          "output_type": "五维诊断报告"
+        },
+        {
+          "id": "dbs-content-diagnosis-report",
+          "name": "内容诊断报告输出",
+          "description": "输出结构化诊断报告，包含推荐形式、五维诊断表格、第一步行动和犀利总结。",
+          "standalone": false,
+          "reusable": false,
+          "input_type": "诊断结果",
+          "output_type": "诊断报告"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-hook",
+        "dbs-xhs-title",
+        "dbs-ai-check",
+        "dbs-wechat-html"
+      ]
+    },
+    "dbs-wechat-html": {
+      "name": "dbs-wechat-html",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-wechat-html/SKILL.md",
+      "description": "微信公众号 HTML 生成。把 Markdown 转成可粘贴到微信公众号后台的 HTML，内置 15 种经典媒体风格。",
+      "trigger": "/dbs-wechat-html, /公众号HTML, '生成公众号 HTML', '做微信公众号版本', '微信排版'",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "dbs-wechat-html-single-style",
+          "name": "单风格 HTML 生成",
+          "description": "将 Markdown 转成指定风格的微信公众号 HTML。15 种风格可选（极简黑白/Medium/WIRED/Stripe/Apple/FT/Linear/GitHub/Notion/课程讲义等）。支持 Markdown 到 HTML 精确转换。输入：Markdown + 风格选择。输出：HTML。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Markdown 文本",
+          "output_type": "HTML 文件"
+        },
+        {
+          "id": "dbs-wechat-html-preview",
+          "name": "多风格预览与全量生成",
+          "description": "三种模式：推荐 1 个最适合风格、--preview 生成 6 个推荐风格+总览页、--all 生成全部 15 个风格+总览页。输入：Markdown + 模式参数。输出：HTML 文件集+总览页。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Markdown 文本 + 模式参数",
+          "output_type": "HTML 文件集 + 总览页"
+        },
+        {
+          "id": "dbs-wechat-html-style-matching",
+          "name": "自然语言风格映射",
+          "description": "将用户自然语言描述（如「干净简洁」「科技感」「商业分析」「课程讲义」）映射到 15 种风格中的最合适一个。输入：自然语言风格描述。输出：风格名称。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "风格名称"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-content"
+      ]
+    },
+    "鲁大魔skills/ludamo-lianmai": {
+      "name": "鲁大魔连麦诊断",
+      "type": "local",
+      "path": "~/.agents/skills/鲁大魔skills/ludamo-lianmai/SKILL.md",
+      "description": "鲁大魔式连麦诊断管道。判思维对不对→不对就拉→给答案（调anli取案例）。   所有内部推理不可见。用户只看到一段鲁大魔式自然对话。   Lu DaMo diagnosis pipeline. Judge thinking → pull out if wrong → give answer with case.",
+      "trigger": "/连麦, 诊断, 推不出去, 卡住了",
+      "category": "diagnosis",
+      "capabilities": [
+        {
+          "id": "lianmai-diagnosis",
+          "name": "连麦诊断",
+          "description": "L0五闻至弧线全流程",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "问题描述",
+          "output_type": "诊断结论+武器链"
+        },
+        {
+          "id": "awareness-spectrum",
+          "name": "认知光谱分析",
+          "description": "分析用户认知阶段",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "用户表述",
+          "output_type": "认知阶段"
+        },
+        {
+          "id": "signal-grid",
+          "name": "信号网格",
+          "description": "识别4种关键信号",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "对话内容",
+          "output_type": "信号列表"
+        },
+        {
+          "id": "type-weapon-map",
+          "name": "锁型-武器匹配",
+          "description": "根据锁型匹配武器链",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "锁型",
+          "output_type": "武器链"
+        }
+      ],
+      "dependencies": [
+        "鲁大魔skills/ludamo-anli"
+      ],
+      "related": [
+        "鲁大魔skills/ludamo",
+        "鲁大魔skills/ludamo-xuexi"
+      ]
+    },
+    "baoyu-article-illustrator": {
+      "name": "baoyu-article-illustrator",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-article-illustrator/SKILL.md",
+      "description": "Analyzes article structure, identifies positions requiring visual aids, generates illustrations with Type × Style × Palette three-dimension approach. Use when user asks to \"illustrate article\", \"add i",
+      "trigger": "为文章配图、illustrate article、add images、生成配图",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "baoyu-article-illustrator-analyze",
+          "name": "文章配图分析与规划",
+          "description": "分析文章结构识别配图位置，Type x Style x Palette三维度方案",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文章文本",
+          "output_type": "配图方案+图片"
+        },
+        {
+          "id": "baoyu-article-illustrator-batch",
+          "name": "批量配图生成",
+          "description": "基于outline.md和prompts/批量生成所有配图",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "提示词文件",
+          "output_type": "PNG图片集"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "dbs-xhs-title": {
+      "name": "dbs-xhs-title",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-xhs-title/SKILL.md",
+      "description": "小红书标题公式工具。从 75 个验证过的爆款公式中，帮你挑对的、用对的、理解为什么用这个。",
+      "trigger": "/dbs-xhs-title, /小红书标题, '帮我起个小红书标题', '小红书标题公式'",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "dbs-xhs-title-formula-matching",
+          "name": "公式匹配",
+          "description": "根据话题属性和行业，从 75 个公式（12 类心理触发器）中选择 5-8 个最合适的公式。覆盖至少 3 种不同类型。匹配逻辑按话题属性优先选择对应类型。输入：话题+行业。输出：5-8个公式。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "话题 + 行业",
+          "output_type": "5-8 个公式"
+        },
+        {
+          "id": "dbs-xhs-title-custom-generation",
+          "name": "定制标题生成",
+          "description": "对每个选中公式套入用户话题和行业生成具体标题。每个标题标注公式编号、展示原始爆款举例、一句话解释为什么选这个公式。Top 3 推荐要有判断。输入：公式+话题。输出：多个标题。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "公式 + 话题",
+          "output_type": "多个标题 + 解释"
+        },
+        {
+          "id": "dbs-xhs-title-optimization",
+          "name": "已有标题优化",
+          "description": "判断已有标题使用的公式选对了吗、执行得好吗，给出优化方案：换公式或在同一公式下优化表达。输入：现有标题。输出：优化方案。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "现有标题",
+          "output_type": "优化方案"
+        },
+        {
+          "id": "dbs-xhs-title-quality-check",
+          "name": "标题质量 5 条铁律检查",
+          "description": "每个标题经 5 条铁律检验：留悬念不说答案、话题扩大不缩窄、击中真实痛点、标题张力至少满足 2 项、小红书标题 ≤20 字。输入：标题。输出：质检结果。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "标题文本",
+          "output_type": "质检结果"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-hook",
+        "dbs-content"
+      ]
+    },
+    "dbs-benchmark": {
+      "name": "dbs-benchmark",
+      "type": "plugin",
+      "path": "~/.claude/plugins/cache/dontbesilent-skills/dbs/1.0.0/skills/dbs-benchmark/SKILL.md",
+      "description": "dontbesilent 对标分析。用五重过滤法帮你找到值得模仿的对标，排除一切关于「我」的噪音。",
+      "trigger": "/dbs-benchmark, /对标, '帮我找对标', '我该模仿谁'",
+      "category": "business",
+      "capabilities": [
+        {
+          "id": "dbs-benchmark-state-assessment",
+          "name": "用户状态判断",
+          "description": "判断用户当前状态（已有业务在跑 / 还没开始 / 说「适合我」），决定对标搜索策略。输入：用户描述。输出：状态判定 + 策略。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "状态判定"
+        },
+        {
+          "id": "dbs-benchmark-five-filter",
+          "name": "五重过滤",
+          "description": "对候选对标逐一过五个筛子：赚钱吗（利润10倍）、能看懂吗（商业模式链条）、能模仿吗（执行可行性）、排除自我（不讨论个人偏好）、不讨论业务本质。输入：候选对标。输出：过滤结果。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "对标数据",
+          "output_type": "过滤结果"
+        },
+        {
+          "id": "dbs-benchmark-report",
+          "name": "对标分析报告输出",
+          "description": "输出通过五重过滤的对标的商业模式分析（获客/转化/交付/复购）、模仿路径和犀利总结。",
+          "standalone": false,
+          "reusable": false,
+          "input_type": "过滤结果",
+          "output_type": "分析报告"
+        },
+        {
+          "id": "dbs-benchmark-imitation-check",
+          "name": "模仿执行颗粒度检查",
+          "description": "逐项对比用户和对标在产品价格、名称、获客平台、内容形式、频率、话术、交付等 9+ 维度的一致性。不一致的地方要求用户解释。输入：对标 + 用户当前状态。输出：差距分析。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "对标 + 用户数据",
+          "output_type": "差距分析"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs",
+        "dbs-diagnosis",
+        "dbs-content"
+      ]
+    },
+    "shortvideo-workbench": {
+      "path": "~/.claude/skills/shortvideo-workbench/SKILL.md",
+      "type": "agent",
+      "trigger": "/创作、/写文案、/出策略、/学习、/学方法",
+      "category": "content",
+      "description": "短视频创作工作台 — 1个Skill，2个入口。创作流+学习流。",
+      "related": [
+        "shortvideo-dimension-extractor",
+        "shortvideo-transform-engine"
+      ],
+      "name": "shortvideo-workbench",
+      "capabilities": [
+        {
+          "id": "shortvideo-workbench-cap-creation-flow",
+          "name": "创作流",
+          "description": "用户输入事实/目的/时长/形式，生成3套宣传策略，用户选择后生成完整文案脚本+标题+话题标签。",
+          "output_type": "宣传策略+文案脚本",
+          "input_type": "自然语言",
+          "reusable": false,
+          "standalone": true
+        },
+        {
+          "id": "shortvideo-workbench-cap-learning-flow",
+          "name": "学习流",
+          "description": "用户输入想学的主题，匹配30课方法论，输出概念→案例→实操三段式教学+练习任务。",
+          "output_type": "教学内容+练习任务",
+          "input_type": "自然语言",
+          "reusable": false,
+          "standalone": true
+        }
+      ],
+      "dependencies": []
+    },
+    "find-skills": {
+      "name": "find-skills",
+      "type": "agent",
+      "path": "~/.agents/skills/find-skills/SKILL.md",
+      "description": "Helps users discover and install agent skills when they ask questions like 'how do I do X', 'find a skill for X', 'is there a skill that can...', or express interest in extending capabilities.",
+      "trigger": "User asks 'how do I do X', 'find a skill for X', 'is there a skill that can...'",
+      "category": "search",
+      "capabilities": [
+        {
+          "id": "skill-discovery-search",
+          "name": "Skill 发现与搜索",
+          "description": "使用 `npx skills find [query]` 或浏览 skills.sh 排行榜搜索 Agent Skill。输入：自然语言查询。输出：排序后的 Skill 结果（含安装量和来源）。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "搜索列表"
+        },
+        {
+          "id": "skill-installation",
+          "name": "Skill 安装",
+          "description": "使用 `npx skills add <owner/repo@skill> -g -y` 安装 Skill 包。输入：Skill 标识符。输出：安装确认。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Skill 标识符",
+          "output_type": "安装确认"
+        },
+        {
+          "id": "skill-quality-verification",
+          "name": "Skill 质量验证",
+          "description": "通过三维度评估 Skill 可信度：安装量（优先 1K+）、来源声誉（官方优先）、GitHub Stars（<100 需谨慎）。输入：搜索结果。输出：可信度判定。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "搜索结果",
+          "output_type": "可信度判定"
+        },
+        {
+          "id": "skill-update-management",
+          "name": "Skill 更新管理",
+          "description": "使用 `npx skills check` 和 `npx skills update` 检查和更新已安装 Skill。输入：无。输出：更新状态。",
+          "standalone": true,
+          "reusable": false,
+          "input_type": "无",
+          "output_type": "更新状态"
+        },
+        {
+          "id": "need-to-skill-category-mapping",
+          "name": "需求到类别映射",
+          "description": "将用户自然语言需求映射到 8 个 Skill 类别之一（Web开发/测试/DevOps/文档/代码质量/设计/生产力/其他），缩小搜索范围。输入：用户需求。输出：类别+搜索建议。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "类别 + 搜索建议"
+        },
+        {
+          "id": "no-skill-found-fallback",
+          "name": "无结果回退处理",
+          "description": "当没有相关 Skill 存在时，承认缺口、提供直接帮助、建议用户用 `npx skills init` 创建自己的 Skill。输入：无结果。输出：回退方案。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "无结果",
+          "output_type": "回退方案"
+        }
+      ],
+      "dependencies": [
+        "npx skills CLI"
+      ],
+      "related": [
+        "skill-creator"
+      ]
+    },
+    "wechat-article-pipeline": {
+      "name": "wechat-article-pipeline",
+      "type": "agent",
+      "path": "~/.agents/skills/wechat-article-pipeline/SKILL.md",
+      "description": "公众号文章全流程生成流水线。9关顺序执行：选题验证→素材准备→初稿生成(去AI味)→AI味检测→共鸣诊断→内容诊断→视觉设计→终检清单→存档发布。内置任务管理和质检系统。",
+      "trigger": "/公众号写作, /写公众号, /wechat-write, 帮我写一篇公众号文章, 公众号发文",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "wechat-topic-validation",
+          "name": "选题验证（Gate 1）",
+          "description": "用传播心理学框架验证选题传播潜力。检查沉默螺旋、使用满足、立场框架、传播入口四个维度。输入：选题。输出：通过/不通过+传播潜力评估。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "传播潜力评估"
+        },
+        {
+          "id": "wechat-material-prep",
+          "name": "素材准备（Gate 2）",
+          "description": "从知识库和用户材料中提取结构化素材卡片（事实/观点/案例/金句）。输入：选题。输出：素材卡片。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "选题+关键词",
+          "output_type": "素材卡片"
+        },
+        {
+          "id": "wechat-draft-anti-ai",
+          "name": "初稿生成+去AI味（Gate 3）",
+          "description": "基于素材写初稿，强制执行6条AI味禁令+6条人味要求+价值词降权词机制。输入：素材卡片。输出：初稿Markdown。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "素材卡片",
+          "output_type": "生成内容"
+        },
+        {
+          "id": "wechat-ai-check",
+          "name": "AI味检测（Gate 4）",
+          "description": "扫描22个AI写作特征，输出检测报告。高危0容忍，中危≤2，低危≤3，总命中≤5。输入：初稿。输出：AI味检测报告。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文本",
+          "output_type": "诊断报告"
+        },
+        {
+          "id": "wechat-resonance-check",
+          "name": "共鸣诊断（Gate 5）",
+          "description": "五维度共鸣诊断：核心机制、沉默解除、立场框架、传播入口、信念结构。输入：初稿。输出：共鸣诊断报告+改法清单。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文本",
+          "output_type": "诊断报告"
+        },
+        {
+          "id": "wechat-content-check",
+          "name": "内容诊断（Gate 6）",
+          "description": "五维内容质量检查：标题吸引力、表达效率、认知落差、文字洁癖。输入：初稿。输出：内容诊断报告。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文本",
+          "output_type": "诊断报告"
+        },
+        {
+          "id": "wechat-visual-design",
+          "name": "视觉设计（Gate 7）",
+          "description": "Markdown转公众号HTML，叠加增强CSS（排版层级+留白节奏+重点标记+手机适配）。输入：终稿Markdown。输出：公众号HTML。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "Markdown文本",
+          "output_type": "HTML代码"
+        },
+        {
+          "id": "wechat-final-qa",
+          "name": "终检清单（Gate 8）",
+          "description": "发布前最后一道门，8项硬指标逐一检查：标题合规、开头Hook、AI味重检、人味重检、隐性钩子、排版完整、字数合规、零错别字。输入：HTML+终稿。输出：质检报告。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文章",
+          "output_type": "质检报告"
+        },
+        {
+          "id": "wechat-archive-publish",
+          "name": "存档与发布（Gate 9）",
+          "description": "按目录结构归档所有文件，更新任务看板。输入：全流程产出。输出：归档文件+更新看板。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "全流程文件",
+          "output_type": "归档文件"
+        },
+        {
+          "id": "wechat-task-management",
+          "name": "任务管理系统",
+          "description": "看板式多任务管理：待写→写作中→诊断中→待发布→已发布。每个任务独立JSON状态文件。输入：任务信息。输出：更新看板+状态文件。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "任务信息",
+          "output_type": "看板更新"
+        }
+      ],
+      "dependencies": [
+        "dbs-spread",
+        "dbs-ai-check",
+        "dbs-resonate",
+        "dbs-content",
+        "dbs-wechat-html"
+      ],
+      "related": [
+        "dbs",
+        "dbs-content",
+        "dbs-resonate",
+        "dbs-ai-check",
+        "dbs-wechat-html",
+        "dbs-save",
+        "dbs-restore"
+      ]
+    },
+    "baoyu-cover-image": {
+      "name": "baoyu-cover-image",
+      "type": "agent",
+      "path": "~/.claude/skills/baoyu-cover-image/SKILL.md",
+      "description": "Generates article cover images with 5 dimensions (type, palette, rendering, text, mood) combining 11 color palettes and 7 rendering styles. Supports cinematic (2.35:1), widescreen (16:9), and square (",
+      "trigger": "生成封面、cover image、文章封面、公众号封面",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "baoyu-cover-image-gen",
+          "name": "封面图五维生成",
+          "description": "Type x Palette x Rendering x Text x Mood五维封面，6类型11色调7渲染",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "标题+主题",
+          "output_type": "封面PNG"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "wechat-article-pipeline"
+      ]
+    },
+    "short-video-kb": {
+      "name": "short-video-kb",
+      "type": "agent",
+      "path": "~/.claude/skills/short-video-kb/SKILL.md",
+      "description": "短视频知识库（360篇薛辉拆解报告 + 五维知识体系）。搜索、检索、引用短视频创作方法论，覆盖受众定位、内容元素、表达结构、核心方法论、可复用内容单元。",
+      "trigger": "短视频怎么做、抖音运营、编导、代运营、选题、文案、表现力、起号、涨粉、变现、口播、IP定位、薛辉、拆解报告、短视频知识库",
+      "category": "knowledge",
+      "capabilities": [
+        {
+          "id": "short-video-kb-search",
+          "name": "短视频知识检索",
+          "description": "从360篇薛辉拆解报告和五维知识体系（受众/元素/结构/方法论/内容单元）中检索相关内容。输入：短视频创作相关问题。输出：带来源引用的结构化回答。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言问题",
+          "output_type": "结构化知识回答 + 报告引用"
+        },
+        {
+          "id": "short-video-kb-audience",
+          "name": "受众分析",
+          "description": "基于受众地图和分类体系，分析目标受众特征、需求和群体选择策略。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "行业/产品描述",
+          "output_type": "受众画像 + 策略建议"
+        },
+        {
+          "id": "short-video-kb-structure",
+          "name": "表达结构匹配",
+          "description": "从表达结构类型学中匹配适合的脚本结构（反常识型/对比型/故事型/清单型/问题解决型/案例验证型/冲突揭示型）。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "内容主题 + 目标受众",
+          "output_type": "推荐结构 + 模板 + 案例报告"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "dbs-content",
+        "dbs-xhs-title",
+        "dbs-hook"
+      ]
+    },
+    "task-quantify": {
+      "name": "task-quantify",
+      "type": "agent",
+      "path": "C:\\Users\\lenovo\\.agents\\skills\\task-quantify\\SKILL.md",
+      "description": "任务量化 Skill —— 从用户视角反推产品需求，经过需求解析→用户旅程反推→产品设计→调研纠错→复用开发→部署反推→优化交付，生成完整量化任务地图。自适应简化/完整双模式，动词开头+验收标准+验证步骤，输出自检清单+复盘模板。",
+      "trigger": "/任务量化 /量化任务 帮我拆解这个任务 把这个需求变成可执行的计划",
+      "category": "workflow",
+      "capabilities": [
+        {
+          "id": "task-quantify-mode-router",
+          "name": "自适应模式判定",
+          "description": "分析需求复杂度（子系统数/工作量/明确度）自动判定简化模式或完整模式。简化模式执行 Phase 1→量化→Phase 7→自检；完整模式执行全部 7 个 Phase + 复盘。输入：自然语言需求。输出：模式判定 + 后续 Phase 列表。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "模式判定"
+        },
+        {
+          "id": "task-quantify-requirement-analysis",
+          "name": "需求解析与维度拆解（Phase 1）",
+          "description": "一句话复述用户需求，从对象/目标/约束/复杂度/成功标准 5 维度拆解，判断领域类型（代码/产品/运营/研究），最多追问 2 个模糊点。输入：自然语言需求。输出：结构化需求分析。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "自然语言",
+          "output_type": "结构化需求分析"
+        },
+        {
+          "id": "task-quantify-user-journey",
+          "name": "用户旅程反推（Phase 2，完整模式）",
+          "description": "假设产品已做好，从用户视角模拟完整使用流程：场景还原→第一步操作→核心路径→关键触点→留存钩子。识别流失风险点。输入：需求分析。输出：用户旅程文档（含设计要点和流失风险）。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "结构化需求",
+          "output_type": "用户旅程文档"
+        },
+        {
+          "id": "task-quantify-product-design",
+          "name": "产品设计（Phase 3，完整模式）",
+          "description": "从用户旅程反推产品设计：信息架构→交互设计→核心功能定义（P0/P1/P2）→用户绑定机制。输入：用户旅程。输出：产品设计方案（含功能分级和绑定策略）。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "用户旅程",
+          "output_type": "产品设计方案"
+        },
+        {
+          "id": "task-quantify-research-correction",
+          "name": "调研纠错（Phase 4，完整模式）",
+          "description": "调研的本质是纠错。带着设计方案做竞品分析、技术可行性验证、用户场景验证、差异化定位。输出修正后的设计方案。输入：产品设计方案。输出：调研纠错报告 + 设计修正。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "设计方案",
+          "output_type": "纠错报告"
+        },
+        {
+          "id": "task-quantify-reuse-first",
+          "name": "复用优先开发（Phase 5，完整模式）",
+          "description": "先上 GitHub 找相似模块，评估复用度（直接用/需修改/需重写），组装集成测试，自研填补缺口。输入：修正后的设计方案。输出：开发策略（可复用模块表 + 自研清单）。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "设计方案",
+          "output_type": "开发策略文档"
+        },
+        {
+          "id": "task-quantify-deployment-reverse",
+          "name": "部署反推（Phase 6，完整模式）",
+          "description": "从正向部署流程反推前置准备：构建→测试环境→E2E→生产→监控。识别各环节风险和规避方案，输出运维维护策略。输入：开发策略。输出：部署方案（含反向推导和注意事项）。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "开发策略",
+          "output_type": "部署方案"
+        },
+        {
+          "id": "task-quantify-optimization-delivery",
+          "name": "优化与交付（Phase 7）",
+          "description": "两种模式共用。性能优化、SEO/可发现性、文档交付（用户文档+技术文档）、对照用户旅程复查每个触点。输入：前置 Phase 输出。输出：优化建议 + 交付清单。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "各 Phase 输出",
+          "output_type": "优化交付方案"
+        },
+        {
+          "id": "task-quantify-task-compiler",
+          "name": "量化任务地图编译器",
+          "description": "将所有分析结果编译成可执行任务。8 条量化规则：动词开头、验收标准 1-3 条、三层验证（测试/构建/手动）、粒度 2-4h、拆分启发式、文件 ≤5 个、垂直切片原则、排序规则（基础先行→高风险前置→依赖满足）。输出含任务表格 + Checkpoint 机制。输入：全部 Phase 输出。输出：量化任务地图（表格+详情）。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "全部 Phase 输出",
+          "output_type": "量化任务地图"
+        },
+        {
+          "id": "task-quantify-self-check",
+          "name": "自检清单（11 项强制）",
+          "description": "输出前强制执行 11 项自检：动词开头、验收标准、验证步骤、文件数 ≤5、垂直切片、Checkpoint 间隔、高风险前置、依赖无循环、标题无和/&/with、工时合理、简化模式跳过不必要 Phase。任一未通过→修正后重输出。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "量化任务地图",
+          "output_type": "自检结果"
+        },
+        {
+          "id": "task-quantify-review-loop",
+          "name": "复盘闭环",
+          "description": "任务执行后的偏差分析模板：实际 vs 计划耗时对比、低估/高估分析、遗漏依赖记录、经验沉淀。复盘结果回流到下次任务改进。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "执行结果",
+          "output_type": "复盘报告"
+        }
+      ],
+      "dependencies": [],
+      "related": [
+        "gateway",
+        "skill-creator",
+        "find-skills"
+      ]
+    }
+  }
+}
