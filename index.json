@@ -1,8 +1,8 @@
 {
   "version": "2.0",
-  "updated_at": "2026-07-15T09:56:30.394035Z",
-  "skill_count": 56,
-  "capability_count": 206,
+  "updated_at": "2026-07-16T05:21:26Z",
+  "skill_count": 58,
+  "capability_count": 221,
   "skills": {
     "dbs": {
       "name": "dbs",
@@ -2730,6 +2730,217 @@
         "gateway",
         "skill-creator",
         "find-skills"
+      ]
+    },
+    "video-transcribe": {
+      "name": "video-transcribe",
+      "type": "agent",
+      "path": "C:\\Users\\lenovo\\Videos\\视频\\马场对话逐字稿提取和skill\\video-transcribe\\SKILL.md",
+      "description": "Extract verbatim timestamped transcripts from local video files using faster-whisper. Use when the user wants to \"transcribe video\", \"extract transcript\", \"逐字稿\", \"视频转文字\", \"字幕提取\", \"add subtitles to video\", or needs timestamped text from any local video/audio file. Handles Chinese and 100+ languages with word-level and segment-level timestamps.",
+      "trigger": "视频转文字, 提取逐字稿, transcribe video, extract transcript, 字幕提取, 视频字幕, 语音转文字",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "video-transcribe-video-to-transcript",
+          "name": "视频转带时间戳逐字稿",
+          "description": "从本地视频文件提取 16kHz 音频，用 faster-whisper 做离线的逐字转录，输出带段级和词级时间戳的文本。支持 100+ 语言。输入：视频文件路径。输出：带 [MM:SS.ss → MM:SS.ss] 时间戳的逐字稿 TXT。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件",
+          "output_type": "文本"
+        },
+        {
+          "id": "video-transcribe-audio-to-transcript",
+          "name": "音频直接转录",
+          "description": "跳过视频提取步骤，直接从音频文件转录。支持 mp3/wav/m4a/aac/ogg/flac/opus。其他同上。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件",
+          "output_type": "文本"
+        },
+        {
+          "id": "video-transcribe-batch-process",
+          "name": "批量视频转录",
+          "description": "一次处理整个文件夹的视频/音频文件。输入：文件夹路径。输出：每个文件对应一个 .逐字稿.txt。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "目录",
+          "output_type": "批量文件"
+        }
+      ],
+      "dependencies": [
+        "faster-whisper",
+        "ffmpeg"
+      ],
+      "related": [
+        "baoyu-youtube-transcript",
+        "videodb",
+        "audio-analysis"
+      ]
+    },
+    "transcript-segmenter": {
+      "name": "transcript-segmenter",
+      "type": "agent",
+      "path": "C:\\Users\\lenovo\\Videos\\视频\\马场对话逐字稿提取和skill\\transcript-segmenter\\SKILL.md",
+      "description": "将带时间戳的逐字稿按话题切分为独立段落。基于短视频口播剪辑方法论+Micro-Topic Method+语义边界检测。",
+      "trigger": "分段逐字稿, 按话题切分对话, split transcript by topic, segment conversation, 话题分段, 对话分段剪辑",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "transcript-segmenter-segment",
+          "name": "逐字稿话题分段",
+          "description": "读入带时间戳的逐字稿，识别话题边界，过滤暖场/录制讨论/重复/收尾，按完整话题切分为独立段落文件。每个段落有标题、摘要、时间范围。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件",
+          "output_type": "批量文件"
+        },
+        {
+          "id": "transcript-segmenter-annotate-keywords",
+          "name": "关键词标注（6类分类法）",
+          "description": "对分段后的逐字稿进行6类关键词标注——核心概念/价值判断/关键数字/专有名词/权力动词/情绪锚点。基于短视频剪辑最佳实践+薛辉Transform分析+GitHub Grader验收方法论。用「」标记关键词，每文件附带关键词索引表。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件",
+          "output_type": "标注文本"
+        },
+        {
+          "id": "transcript-segmenter-verify-keywords",
+          "name": "关键词标注验证",
+          "description": "用assertion-based grading方法验证关键词标注质量：覆盖率(>=5/文件)、类别分布(3+类>10%)、密度控制(<20%)、单文件范围(5-80)、无停用词污染，外加3条隐含声明验证。输出验证报告。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "标注文本",
+          "output_type": "诊断报告"
+        },
+        {
+          "id": "transcript-segmenter-verify",
+          "name": "段落完整性验证",
+          "description": "对分段结果做独立性/完整性/价值/开头干净/结尾完整/无录制元讨论/时间戳完整 七项检查。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "批量文件",
+          "output_type": "诊断报告"
+        },
+        {
+          "id": "transcript-segmenter-report-cut",
+          "name": "裁剪决策报告",
+          "description": "报告哪些片段被裁剪及原因（暖场/录制讨论/重复/收尾），给出统计：保留比例、裁剪时长分布。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件",
+          "output_type": "报告"
+        }
+      ],
+      "dependencies": [
+        "video-transcribe"
+      ],
+      "related": [
+        "short-video-kb",
+        "baoyu-youtube-transcript",
+        "dbs-hook"
+      ]
+    },
+    "video-splitter": {
+      "name": "video-splitter",
+      "type": "agent",
+      "path": "C:\\Users\\lenovo\\Videos\\视频\\马场对话逐字稿提取和skill\\video-splitter\\SKILL.md",
+      "description": "用 ffmpeg 双通道 seek + 重编码方式按精确时间戳切分视频。保证音画同步，帧级精确。配合 transcript-segmenter 实现逐字稿→视频段端到端流水线。",
+      "trigger": "切视频, split video by timestamps, 视频切段, 按时间戳剪视频, cut into clips, 把视频剪成小段, video to segments",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "video-splitter-split-by-timestamps",
+          "name": "按时间戳切分视频",
+          "description": "用双通道 seek（-ss before -i + -ss after -i）+ 重编码（libx264 CRF18）方式，按精确时间戳边界切分视频为独立片段。±0.5s 缓冲，杜绝音画不同步。输入：视频 + 时间戳列表。输出：独立 MP4 文件。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "文件+数据",
+          "output_type": "视频文件"
+        },
+        {
+          "id": "video-splitter-verify-clips",
+          "name": "切段结果验证",
+          "description": "验证每个输出片段：时长误差 <±2s、音视频流完整、文件大小 >100KB。输出验证报告 JSON。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "视频文件",
+          "output_type": "诊断报告"
+        },
+        {
+          "id": "video-splitter-from-transcript",
+          "name": "逐字稿到视频段端到端",
+          "description": "读取 transcript-segmenter 的分段定义，直接切分出对应的视频片段，实现文本段→视频段完美对齐。",
+          "standalone": false,
+          "reusable": true,
+          "input_type": "逐字稿分段定义",
+          "output_type": "视频文件"
+        }
+      ],
+      "dependencies": [
+        "ffmpeg",
+        "transcript-segmenter"
+      ],
+      "related": [
+        "video-transcribe",
+        "videodb"
+      ]
+    },
+    "subtitle-studio": {
+      "name": "subtitle-studio",
+      "type": "agent",
+      "path": "C:\\Users\\lenovo\\Videos\\视频\\马场对话逐字稿提取和skill\\subtitle-studio\\SKILL.md",
+      "description": "完整的视频内容强调系统，覆盖7个维度：字幕动画(8种预设，源自animate-text+CapCut)、字幕颜色(7种调色板)、字幕位置(5种布局，含安全区)、音效(13种合成WAV)、画面缩放(5种)、蒙版(5种)、滤镜(5种)。全部集成到6场景情绪引导矩阵(HOOK/INSIGHT/WARNING/EMPATHY/CLIMAX/CLOSE)，每个场景指定精确的7维处理方案。与transcript-segmenter关键词标注联动。",
+      "trigger": "字幕动画, 字幕特效, 视频强调, 画面效果, 滤镜蒙版, 音效设计, kinetic captions, animated subtitles, video emphasis, 加字幕, 加特效, 做字幕, 字幕+画面, 剪辑包装",
+      "category": "content",
+      "capabilities": [
+        {
+          "id": "subtitle-studio-emotional-design",
+          "name": "6场景情绪引导矩阵",
+          "description": "根据场景(HOOK/INSIGHT/WARNING/EMPATHY/CLIMAX/CLOSE)输出完整的7维处理方案：缩放+蒙版+滤镜+动画+颜色+位置+音效。每个维度有精确参数和选择理由。独立JSON spec文件，可直接查询。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "场景ID或关键词类别",
+          "output_type": "7维设计方案"
+        },
+        {
+          "id": "subtitle-studio-animation",
+          "name": "8种字幕动画预设",
+          "description": "基于animate-text(1.6K installs)的JSON规格格式：pop-in/slide-up-fade/shake-flash/blur-in/scale-burst/typewriter/crossfade/word-by-word。每种含精确duration_ms/stagger_ms/easing/from/to参数。对应CapCut官方2025指南的Pop/Bounce/Slide/Blur/Zoom/Typewriter/Fade/Active Word。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "预设ID",
+          "output_type": "动画参数JSON"
+        },
+        {
+          "id": "subtitle-studio-visual",
+          "name": "画面强调（缩放+蒙版+滤镜）",
+          "description": "5种画面缩放(弹入/推近/拉远/脉冲/无)+5种蒙版(聚光/暗角/虚化/黑边/无)+5种滤镜(鲜活/冷调/暗调/暖金/自然)。每种有精确ffmpeg参数和场景映射。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "场景ID",
+          "output_type": "ffmpeg滤镜链参数"
+        },
+        {
+          "id": "subtitle-studio-sound",
+          "name": "13种音效合成",
+          "description": "纯Python(math+wave)合成，4大类：转场3种/强调3种/情绪5种/标点2种。16-bit 44.1kHz mono WAV。4档混音级别(-10/-12/-18/-20dB)。3种时序规则(with_entry/before_100ms/before_50ms)。",
+          "standalone": true,
+          "reusable": true,
+          "input_type": "无",
+          "output_type": "WAV音效文件"
+        }
+      ],
+      "dependencies": [
+        "ffmpeg",
+        "transcript-segmenter"
+      ],
+      "related": [
+        "animate-text",
+        "caption-animation",
+        "video-splitter",
+        "video-transcribe",
+        "videodb"
       ]
     }
   }

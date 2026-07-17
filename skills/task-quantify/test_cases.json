@@ -1,0 +1,66 @@
+[
+  {
+    "id": "simple-full-blog",
+    "prompt": "帮我开发一个个人博客系统",
+    "mode": "完整模式",
+    "checks": {
+      "has_user_journey": true,
+      "has_product_design": true,
+      "has_competitor_analysis": true,
+      "has_reuse_strategy": true,
+      "has_deployment_plan": true,
+      "has_quantified_map": true,
+      "has_checkpoint": true,
+      "has_self_check": true,
+      "all_tasks_verbed": true,
+      "all_tasks_have_ac": true,
+      "no_task_over_5_files": true,
+      "no_horizontal_slices": true
+    }
+  },
+  {
+    "id": "simple-login-page",
+    "prompt": "帮我写一个登录页面",
+    "mode": "简化模式",
+    "checks": {
+      "has_requirement_analysis": true,
+      "has_quantified_map": true,
+      "has_self_check": true,
+      "no_user_journey": true,
+      "no_competitor_analysis": true,
+      "no_deployment_plan": true,
+      "all_tasks_verbed": true,
+      "all_tasks_have_ac": true
+    }
+  },
+  {
+    "id": "empty-input",
+    "prompt": "",
+    "mode": "error",
+    "checks": {
+      "returns_error_or_clarification": true
+    }
+  },
+  {
+    "id": "non-chinese-input",
+    "prompt": "Help me build a REST API for user management",
+    "mode": "完整模式",
+    "checks": {
+      "handles_english_prompt": true,
+      "all_tasks_verbed": true,
+      "all_tasks_have_ac": true
+    }
+  },
+  {
+    "id": "migration-refactor",
+    "prompt": "帮我重构用户认证模块，把JWT换成OAuth2",
+    "mode": "简化模式",
+    "checks": {
+      "has_requirement_analysis": true,
+      "has_quantified_map": true,
+      "all_tasks_verbed": true,
+      "all_tasks_have_ac": true,
+      "addresses_migration_risk": true
+    }
+  }
+]
