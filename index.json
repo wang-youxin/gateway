@@ -1,8 +1,10 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "updated_at": "",
   "skill_count": 0,
   "capability_count": 0,
+  "generator": "refresh-index.js",
+  "fingerprint": "",
   "skills": {},
-  "_instructions": "说 /gateway refresh 来首次扫描并填充此索引。详见 README.md。"
+  "_instructions": "空模板。运行 /gateway refresh 或 node refresh-index.js 扫描本地 Skill 后填充。填充后的条目含本机绝对路径，属个人运行时数据，请勿提交回公开仓库。"
 }
