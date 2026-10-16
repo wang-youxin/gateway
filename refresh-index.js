@@ -15,6 +15,10 @@
 const fs = require('fs');
 const path = require('path');
 
+// 只扫 ~/.workbuddy/skills。用户明确指定：不扫 ~/.agents/skills。
+// 原因：.agents 是双份部署的副本，两边同步不是原子的，扫两边会把只存在于
+// 一侧的副本也计入（实测会让索引从 119 膨胀到 168），匹配时命中已失效的副本路径。
+// 索引的唯一真源是 .workbuddy，.agents 只作为运行时副本接收同步。
 const SKILLS_ROOT = path.join(process.env.HOME || process.env.USERPROFILE, '.workbuddy', 'skills');
 const INDEX_PATH = path.join(__dirname, 'index.json');
 
