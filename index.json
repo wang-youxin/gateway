@@ -1,10 +1,12 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "updated_at": "",
   "skill_count": 0,
   "capability_count": 0,
+  "group_count": 13,
   "generator": "refresh-index.js",
   "fingerprint": "",
+  "groups": {},
   "skills": {},
-  "_instructions": "空模板。运行 /gateway refresh 或 node refresh-index.js 扫描本地 Skill 后填充。填充后的条目含本机绝对路径，属个人运行时数据，请勿提交回公开仓库。"
+  "_instructions": "空模板。运行 /gateway refresh 或 node refresh-index.js 扫描本地 Skill 后填充。填充后的条目含本机绝对路径，属个人运行时数据，请勿提交回公开仓库。v2.1 起索引为两层结构：顶层 groups（大类 → 解决什么问题 → 成员数，由 refresh-index.js 的 GROUP_META 生成）+ 每条目的 group / solves_small 字段。"
 }

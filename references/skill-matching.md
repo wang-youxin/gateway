@@ -13,11 +13,11 @@
 - 同步：`cp ~/.workbuddy/skills/gateway/index.json ~/.agents/skills/gateway/index.json`
 - 索引不存在或损坏 → 先重建再匹配
 
-schema v2 每条目字段：`name / description / trigger / category / subtype / capabilities / dependencies / keywords / path`
+schema v2.1 每条目字段：`name / description / trigger / category / subtype / capabilities / dependencies / keywords / path / group / solves_small`；顶层另有 `groups`（大类 → 解决什么问题 → 成员数）
 
 ---
 
-## 四层收敛
+## 收敛层次（0 → 0.5 → 1 → 2 → 3）
 
 ### 第 0 层：副作用过滤（安全闸门，先跑）
 
@@ -32,6 +32,20 @@ schema v2 每条目字段：`name / description / trigger / category / subtype /
 | 有副作用 + 用户没点名 | 踢出候选池，不出现在推荐里 |
 | 有副作用 + 用户点名 | 跳过评分，直接给路径，但**执行前复述一遍将要发生什么** |
 | 无副作用 | 进第 1 层正常评分 |
+
+### 第 0.5 层：大类定位（先定大类，再谈匹配）
+
+索引顶层 `groups` 把全部 Skill 分成若干**大类**，每个大类带三样东西：`name`（类名）、`solves`（解决什么问题）、`hints`（检索提示词）。导航第一步不是捞 Skill，是定大类：
+
+1. 读 `groups`，按用户需求选 1 个大类——语义 reader 对 `name + solves`，机械匹配对 `hints`
+2. 大类内每个 Skill 带 `solves_small`（它解决这个大类下的什么小问题），先扫这层缩小到 2-5 个候选
+3. 候选仍超过 5 个，再进第 1 层用 subtype 砍
+
+**匹配纪律：大类只按 `name + solves + hints` 判，不许堆成员关键词计分。** 24 个成员的大类会靠关键词体量抢走一切 query（实测：「代码 review」被 content-growth 抢走），大类越大偏差越狠。
+
+大类定错比选错 Skill 更致命——后面全层都白跑。需求横跨两个大类（如「写篇文章发到公众号」横跨 writing-craft 和 wechat-publishing）→ 按主目的选一个，另一个在推荐里带一句。
+
+新装入的 skill 若落入 `other`（未归类）组，先给它补 GROUP_RULES 再匹配——`other` 是提醒，不是常态桶。
 
 ### 第 1 层：category + subtype 过滤
 
@@ -68,6 +82,8 @@ schema v2 每条目字段：`name / description / trigger / category / subtype /
 | ≥6 | 精确匹配 → 直接给路径 |
 | 4-5 | 候选匹配 → 列 2-3 个 + 推荐，让用户选 |
 | 0-3 | 无匹配 → 搜索生态 |
+
+**多个候选同分是常态**（关键词袋召回的正常结果，别当成故障）。破平顺序：① `solves_small` 与 query 主词的语义接近度（"写口播稿" ≈ "口播脚本生成器"，字面重合度帮不上忙）；② 仍平就并列展示带推荐，让用户选——**不许硬指定一个**。
 
 **候选必须带推荐**，不能只列选项让用户自己挑。
 

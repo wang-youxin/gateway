@@ -41,6 +41,65 @@ function categorize(name) {
   return 'dev';
 }
 
+/**
+ * 大类元数据（O2 · Skill 扫描分层，2026-10-22 实施）
+ * 第一层「大类」：每个大类解决什么问题（solves 是给人看的判据，导航第一步读它）
+ *   hints：大类的检索提示词——solves 是散文，hints 是抓手，机械匹配和语义匹配都能用
+ * 第二层「小问题」：每个 Skill 在大类内解决什么小问题（solves_small，从 description 首句派生，见 buildSolvesSmall）
+ * 匹配纪律：大类只按 name + solves + hints 判，**不许堆成员关键词计分**——24 个成员的大类
+ * 会靠关键词体量抢走一切 query（实测：「代码 review」被 content-growth 抢走）。
+ */
+const GROUP_META = {
+  'meta': { name: 'Skill 生态与自我管理', solves: 'skill 本身的安装/创建/查找/发布，以及不绑定具体业务的通用工作法', hints: ['装 skill', '找 skill', '新建 skill', '技能管理', '发布 skill', 'install skill'] },
+  'biz-diagnosis': { name: '商业诊断与决策', solves: '方向对不对、决策怎么拍：诊断生意/目标/概念、对标分析、复盘出报告', hints: ['诊断', '商业模式', '决策', '目标', '拆概念', '复盘', '报告', '问诊'] },
+  'content-growth': { name: '短视频获客与内容增长', solves: '怎么靠内容拿到客户：账号诊断、选题、口播稿、跨平台改编、投放算账', hints: ['抖音', '短视频', '选题', '口播', '账号', '获客', '对标', '投放', '起号'] },
+  'wechat-publishing': { name: '公众号生产与多平台发布', solves: '文章怎么生产出来并发出去：流水线、排版、封面、推草稿箱、发微博/X', hints: ['公众号', '排版', '草稿箱', '发布', '推送', '封面', '微信'] },
+  'visual-gen': { name: '视觉素材生成', solves: '图从哪来：封面、插图、信息图、漫画、幻灯片、小红书图文', hints: ['封面', '配图', '插图', '信息图', '漫画', '幻灯片', '出图', '画图'] },
+  'video-audio': { name: '音视频制作与转录', solves: '视频音频怎么剪、怎么转、怎么理解：字幕、剪辑、语音分析', hints: ['视频', '字幕', '剪辑', '音频', '转录', '配音'] },
+  'writing-craft': { name: '写作技法与文章结构', solves: '文章怎么写、怎么组织：写作方法、结构、给 agent 看的文档写法', hints: ['写作', '文章', '结构', '文案', '文稿', '文档'] },
+  'knowledge-learning': { name: '知识积累与学习教学', solves: '知识怎么攒、怎么学会、怎么教：知识库工程、课程拆解、交互式学习', hints: ['知识库', '学习', '教会', '教学', '课程', '笔记', '备课'] },
+  'dev-workflow': { name: '软件开发工作流', solves: '代码怎么正确地写出来：需求澄清→规格→工单→实现→评审→调试→架构', hints: ['代码', '开发', '需求', '评审', '调试', '架构', '测试', 'bug', '重构', 'review'] },
+  'devops-repo': { name: '仓库工程设施', solves: '仓库怎么不出事：git 护栏、提交前检查、版本迁移、脚手架', hints: ['git', '提交', '钩子', '仓库', '分支', 'pre-commit'] },
+  'utility-fetch': { name: '素材抓取与格式转换', solves: '外面的东西怎么拿进来、怎么换格式：URL→md、转录、翻译、压缩、解包', hints: ['网页', '链接', 'url', '转录', '翻译', '压缩', '格式转换', 'markdown', '解包', '抓取'] },
+  'misc': { name: '其他专项', solves: '一事一议的专项自动化，不属于以上任何大类', hints: [] },
+  'other': { name: '未归类', solves: '新装入、GROUP_RULES 还没覆盖的 skill——见到请先在规则里补一条，不要把 other 当常态桶', hints: [] },
+};
+
+/**
+ * 大类规则：按顺序匹配 name，命中即返回；都不中 → other（提醒补规则）
+ * 注意顺序：先具体后宽泛——wechat/gzh/baoyu 系先归位，剩下的 dev 名再进 dev-workflow
+ */
+const GROUP_RULES = [
+  { match: (n) => ['gateway', 'skill-creator', 'find-skills', 'ponytail', 'task-quantify', 'release-skills'].includes(n), group: 'meta' },
+  { match: (n) => ['dbs', 'dbs-action', 'dbs-agent-migration', 'dbs-ai-check', 'dbs-chatroom', 'dbs-chatroom-austrian', 'dbs-decision', 'dbs-deconstruct', 'dbs-diagnosis', 'dbs-goal', 'dbs-good-question', 'dbs-report', 'dbs-restore', 'dbs-save', 'dbs-slowisfast'].includes(n), group: 'biz-diagnosis' },
+  { match: (n) => n.startsWith('gzh-') || n.startsWith('wechat-') || n.startsWith('baoyu-post-') || n === 'baoyu-markdown-to-html' || n === 'baoyu-wechat-summary' || n === 'dbs-wechat-html', group: 'wechat-publishing' },
+  { match: (n) => ['baoyu-image-gen', 'baoyu-cover-image', 'baoyu-infographic', 'baoyu-xhs-images', 'baoyu-diagram', 'baoyu-comic', 'baoyu-slide-deck', 'baoyu-article-illustrator'].includes(n), group: 'visual-gen' },
+  { match: (n) => ['smart-short-video-editor', 'videodb', 'audio-analysis'].includes(n), group: 'video-audio' },
+  { match: (n) => n.startsWith('writing-'), group: 'writing-craft' },
+  { match: (n) => ['kb-question-layer', 'ai-lesson-3in1', 'dbs-learning', 'teach'].includes(n), group: 'knowledge-learning' },
+  { match: (n) => ['git-guardrails-claude-code', 'setup-pre-commit', 'migrate-to-shoehorn', 'scaffold-exercises'].includes(n), group: 'devops-repo' },
+  { match: (n) => n.startsWith('baoyu-url') || n.startsWith('baoyu-danger') || n.startsWith('baoyu-electron') || n.startsWith('baoyu-compress') || n.startsWith('baoyu-translate') || n === 'baoyu-youtube-transcript' || n === 'baoyu-format-markdown', group: 'utility-fetch' },
+  { match: (n) => n.startsWith('jfp-') || n.startsWith('douyin-') || n === 'short-video-kb' || n.startsWith('shortvideo-') || ['content-factory', 'course-deconstruct', 'dbs-hook', 'dbs-spread', 'dbs-resonate', 'dbs-content', 'dbs-content-system', 'dbs-xhs-title', 'dbs-benchmark'].includes(n), group: 'content-growth' },
+  { match: (n) => n === 'yys-auto-farm', group: 'misc' },
+  { match: (n) => ['agentflow', 'ask-matt', 'claude-handoff', 'code-review', 'codebase-design', 'diagnosing-bugs', 'domain-modeling', 'frontend-design', 'grill-me', 'grill-with-docs', 'grilling', 'handoff', 'implement', 'implement-spec', 'improve-codebase-architecture', 'loop-me', 'prototype', 'research', 'resolving-merge-conflicts', 'retro', 'setup-matt-pocock-skills', 'setup-ts-deep-modules', 'tdd', 'to-questionnaire', 'to-spec', 'to-tickets', 'triage', 'typesafe-ai', 'wait-what', 'wayfinder', 'wizard'].includes(n), group: 'dev-workflow' },
+];
+
+function groupOf(name) {
+  for (const rule of GROUP_RULES) {
+    if (rule.match(name)) return rule.group;
+  }
+  return 'other';
+}
+
+/** 小问题短语：从 description 首句截取，让导航第二步「这个 skill 解决什么小问题」可扫读 */
+function buildSolvesSmall(name, description, trigger) {
+  const src = (description || trigger || '').trim();
+  if (!src) return '';
+  const first = src.split(/[。；;\n]/)[0].trim();
+  const cut = first.length > 60 ? first.slice(0, 60) + '…' : first;
+  return cut || name;
+}
+
 /** 解析 YAML frontmatter（只取 name / description，够用且不引第三方依赖） */
 function parseFrontmatter(content) {
   const lines = content.split(/\r?\n/);
@@ -129,6 +188,7 @@ const ZH_SYNONYMS = [
   { re: /architect|module|deep[- ]?module/, zh: ['架构', '模块设计', '深模块', '系统设计'] },
   { re: /prototype/, zh: ['原型', '原型验证'] },
   { re: /research|investigat/, zh: ['调研', '调研报告', '查证'] },
+  { re: /url|fetch|scrape|crawl/, zh: ['网页', '链接', '网址', '抓取'] },
   { re: /wizard|bash/, zh: ['向导', '脚手架', '交互式', '凭据', 'ci'] },
   { re: /handoff|hand-off/, zh: ['交接', '交棒', '上下文传递'] },
   { re: /teach|tutor|learn/, zh: ['教学', '教会', '学习', '带练'] },
@@ -229,6 +289,7 @@ function main() {
     }
 
     const category = categorize(name);
+    const group = groupOf(name);
     entries.push({
       name,
       type: path.join(SKILLS_ROOT, dir).includes('plugins') ? 'plugin' : 'agent',
@@ -241,6 +302,8 @@ function main() {
       dependencies,
       keywords: buildKeywords(name, description, caps),
       related: [],
+      group,
+      solves_small: buildSolvesSmall(name, description, fm.description || ''),
     });
   }
 
@@ -250,12 +313,19 @@ function main() {
   const fingerprint = entries.map((e) => `${e.name}@${e.path}`).join('|');
 
   const index = {
-    version: '2.0',
+    version: '2.1',
     updated_at: new Date().toISOString(),
     skill_count: entries.length,
     capability_count: entries.reduce((s, e) => s + e.capabilities.length, 0),
+    group_count: Object.keys(GROUP_META).length,
     generator: 'refresh-index.js',
     fingerprint,
+    groups: Object.fromEntries(
+      Object.entries(GROUP_META).map(([gid, meta]) => [
+        gid,
+        { ...meta, count: entries.filter((e) => e.group === gid).length },
+      ])
+    ),
     skills: Object.fromEntries(entries.map((e) => [e.name, e])),
   };
 
